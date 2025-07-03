@@ -9,7 +9,7 @@
 </head>
 
 <body class="antialiased">
-    <div class="bg-blue-500 text-white p-8 rounded-lg shadow-md">
+    <div class="bg-blue-500 text-white p-8c rounded-lg shadow-md">
         Bienvenue Tailwind + Laravel 8 🎯
     </div>
 </body>
