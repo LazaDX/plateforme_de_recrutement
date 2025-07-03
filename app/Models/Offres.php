@@ -8,15 +8,34 @@ use Illuminate\Database\Eloquent\Model;
 class Offres extends Model
 {
     use HasFactory;
-    protected $table = 'offres';
-    protected $fillable = ['nom_enquete', 'description', 'date_debut', 'date_limite', 'status', 'administrateurs_id'];
+     protected $table = 'offres';
 
-    public function postulesOffres()
+    protected $fillable = [
+        'id','nom_enquete', 'details_enquete', 'date_debut', 'date_limite', 'administrateur_id', 'status_offre'
+    ];
+
+    public function administrateurs()
     {
-        return $this->hasMany(PostuleOffres::class, 'offre_id');
+        return $this->belongsTo(Administrateur::class);
     }
 
-    public function administrateurs() {
-        return $this->belongsTo(Administrateurs::class, 'administrateur_id');
+    public function questionsFormulaires()
+    {
+        return $this->hasMany(QuestionFormulaire::class, 'offre_id');
+    }
+
+    public function postuleOffres()
+    {
+        return $this->hasMany(PostuleOffre::class, 'offre_id');
+    }
+
+    public function accesOffres()
+    {
+        return $this->hasMany(AccesOffre::class, 'offre_id');
+    }
+
+    public function visiteurs()
+    {
+        return $this->hasMany(Visiteur::class, 'offre_id');
     }
 }

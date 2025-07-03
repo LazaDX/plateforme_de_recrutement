@@ -5,13 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PostuleOffres extends Model
+class QuestionsFormulaire extends Model
 {
     use HasFactory;
-    protected $table = 'postule_offres';
-
+    protected $table = 'questions_formulaires';
     protected $fillable = [
-        'id','offre_id', 'enqueteur_id', 'date_postule', 'type_enqueteur'
+        'id','offre_id', 'label', 'type', 'obligation'
     ];
 
     public function offre()
@@ -19,13 +18,9 @@ class PostuleOffres extends Model
         return $this->belongsTo(Offre::class);
     }
 
-    public function enqueteur()
-    {
-        return $this->belongsTo(Enqueteur::class);
-    }
-
     public function reponsesFormulaire()
     {
-        return $this->hasMany(ReponseFormulaire::class, 'postuleoffre_id');
+        return $this->hasMany(ReponseFormulaire::class, 'question_id');
     }
+
 }

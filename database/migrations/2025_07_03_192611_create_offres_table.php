@@ -15,15 +15,8 @@ class CreateOffresTable extends Migration
     {
         Schema::create('offres', function (Blueprint $table) {
             $table->id();
-            $table->string("nom_enquete");
-            $table->text("description");
-            $table->date("date_debut");
-            $table->date("date_limite");
-            $table->string("status");
-            $table->unsignedBigInteger('administrateurs_id');
-            $table->foreign('administrateurs_id')->references('id')->on('administrateurs')->onDelete('cascade');
             $table->timestamps();
-          });
+        });
     }
 
     /**
