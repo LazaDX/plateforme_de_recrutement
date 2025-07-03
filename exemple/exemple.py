@@ -1,5 +1,6 @@
 a = 5
-b = 10
+x = 10
+#mkjmljh
 for i in range(10):
     a += i
 print(a + b)
