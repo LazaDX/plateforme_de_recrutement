@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAccesOffresTable extends Migration
+class CreateAccesOffres extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,9 @@ class CreateAccesOffresTable extends Migration
     {
         Schema::create('acces_offres', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('offre_id')->constrained('offres')->onDelete('cascade');
+            $table->foreignId('administrateur_id')->constrained('administrateurs')->onDelete('cascade');
+            $table->boolean('etat')->default(true);
             $table->timestamps();
         });
     }
@@ -26,6 +29,8 @@ class CreateAccesOffresTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('acces_offres');
+        Schema::table('acces_offres', function (Blueprint $table) {
+            //
+        });
     }
 }

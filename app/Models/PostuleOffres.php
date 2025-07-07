@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class PostuleOffres extends Model
 {
     use HasFactory;
-    protected $table = 'postule_offres';
+    protected $table = 'postules_offres';
 
     protected $fillable = [
-        'id','offre_id', 'enqueteur_id', 'date_postule', 'type_enqueteur'
+        'id','offre_id', 'enqueteur_id', 'date_postule', 'type_enqueteur', 'status_postule'
     ];
 
     public function offre()

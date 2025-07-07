@@ -11,7 +11,7 @@ class Offres extends Model
      protected $table = 'offres';
 
     protected $fillable = [
-        'id','nom_enquete', 'details_enquete', 'date_debut', 'date_limite', 'administrateur_id', 'status_offre'
+        'id','nom_enquete', 'details_enquete', 'date_debut', 'date_limite', 'administrateur_id', 'status_offre', 'priorite'
     ];
 
     public function administrateurs()

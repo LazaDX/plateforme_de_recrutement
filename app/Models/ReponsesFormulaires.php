@@ -11,7 +11,7 @@ class ReponsesFormulaires extends Model
     protected $table = 'reponses_formulaires';
 
     protected $fillable = [
-        'id','postuleoffre_id', 'question_id', 'valeur'
+        'id','postule_offre_id', 'question_id', 'valeur'
     ];
 
     public function postuleOffre()

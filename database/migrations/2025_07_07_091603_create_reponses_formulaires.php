@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateReponsesFormulairesTable extends Migration
+class CreateReponsesFormulaires extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,9 @@ class CreateReponsesFormulairesTable extends Migration
     {
         Schema::create('reponses_formulaires', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('postule_offre_id')->constrained('postules_offres')->onDelete('cascade');
+            $table->foreignId('question_id')->constrained('questions_formulaires')->onDelete('cascade');
+            $table->string('valeur'); // La réponse à la question
             $table->timestamps();
         });
     }
@@ -26,6 +29,8 @@ class CreateReponsesFormulairesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reponses_formulaires');
+        Schema::table('reponses_formulaires', function (Blueprint $table) {
+            //
+        });
     }
 }
