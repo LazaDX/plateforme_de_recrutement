@@ -17,4 +17,7 @@ Route::middleware('auth:admin')->group(function () {
 });
 
 
+Route::get('/admin', function () {
+    return view('backOffice.layouts.admin');
+});
 
