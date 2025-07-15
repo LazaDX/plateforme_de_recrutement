@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Administrateurs extends Model
+
+class Administrateurs extends Authenticatable
 {
     use HasFactory;
+
+
     protected $table = 'administrateurs';
     protected $fillable = [
         'id',

@@ -19,7 +19,7 @@ class CreateEnqueteurs extends Migration
             $table->string('prenom');
             $table->string('email')->unique();
             $table->string('password');
-            $table->date('date_de_naissance');
+            $table->date('date_de_naissance')->nullable();
             $table->string('photo')->nullable();
             $table->string('diplomes')->nullable();
             $table->string('experiences')->nullable();
