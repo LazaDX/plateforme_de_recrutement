@@ -15,3 +15,6 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('admin.logout');
 });
+
+
+
