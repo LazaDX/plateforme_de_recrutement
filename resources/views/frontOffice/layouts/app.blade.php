@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'FrontOffice')</title>
+    <title>@yield('title', 'frontOffice')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

@@ -13,12 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+<<<<<<< HEAD
 // Route::get('/', function () {
 //     return view('');
 // });
 
+=======
+>>>>>>> laza
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('frontOffice.pages.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
 require __DIR__.'/auth.php';
