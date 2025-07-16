@@ -13,7 +13,7 @@ Route::middleware('auth:admin')->group(function () {
         return view('backOffice.pages.dashboard');
     })->name('backOffice.pages.dashboard');
 
-    Route::post('/admin/logout', [AdminAuthController::class, 'destroy'])->name('admin.logout');
+    Route::post('admin/logout', [AdminAuthController::class, 'destroy'])->name('admin.logout');
 });
 
 
