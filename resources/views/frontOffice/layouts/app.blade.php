@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'frontOffice')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <script src="{{ mix('js/app.js') }}" defer></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -15,7 +16,7 @@
     {{-- Sidebar --}}
 
     {{-- Contenu principal --}}
-    <main class="p-6">
+    <main class="p-6">  
         @yield('content')
     </main>
 </body>

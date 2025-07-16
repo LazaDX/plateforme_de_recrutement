@@ -5,14 +5,13 @@ module.exports = {
     content: [
         './resources/**/*.blade.php',
         './resources/**/*.js',
-        
     ],
 
     theme: {
         extend: {
-           
+            // tes extensions ici
         },
     },
 
     plugins: [],
-};resources/views/frontOffice/components/navbar.blade.php
+};
