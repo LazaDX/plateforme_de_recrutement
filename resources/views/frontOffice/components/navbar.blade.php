@@ -3,9 +3,9 @@
     @auth
         <div>
             Bonjour <span class="font-semibold">{{ Auth::user()->nom }}</span>
-            <form method="POST" action="{{ route('logout') }}" class="inline ml-4">
+            <form method="POST" action="{{ route('enqueteur.logout') }}">
                 @csrf
-                <button class="text-red-500">Déconnexion</button>
+                <button type="submit" class="text-red-500 hover:underline">Se déconnecter</button>
             </form>
         </div>
     @endauth

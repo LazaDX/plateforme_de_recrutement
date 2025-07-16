@@ -9,7 +9,7 @@ class AdminAuthController extends Controller
 {
      public function create()
     {
-        return view('auth.admin-login');
+        return view('backOffice.auth.login');
     }
 
     /**
