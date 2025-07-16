@@ -1,4 +1,4 @@
-@extends('frontoffice.layouts.app')
+@extends('frontOffice.layouts.app')
 
 @section('title', 'Dashboard')
 
