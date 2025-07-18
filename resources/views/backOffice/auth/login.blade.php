@@ -1,4 +1,4 @@
-@extends('frontOffice.layouts.app')
+@extends('backOffice.layouts.admin')
 
 @section('title', 'Connexion')
 
