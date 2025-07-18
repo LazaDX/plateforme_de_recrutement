@@ -1,5 +1,5 @@
 <nav class="bg-white shadow p-4 flex justify-between items-center">
-    <div class="text-xl font-bold">Plateforme Enquêteur</div>
+    <div class="text-xl font-bold">Plateforme Admin</div>
     @auth('admin')
         <div>
             Bonjour <span class="font-semibold">{{ Auth::guard('admin')->user()->nom }}</span>
