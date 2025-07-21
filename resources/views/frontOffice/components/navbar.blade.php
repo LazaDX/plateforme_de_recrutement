@@ -26,7 +26,7 @@
             {{-- Avatar + Dropdown --}}
             <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                 @auth
-                    <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
+                    <button @click="open = !open" class="flex items-center space-x-2 pl-6 p-2 rounded-lg">
 
                         @if (Auth::user()->photo)
                             <img src="{{ Auth::user()->photo }}" alt="{{ Auth::user()->nom }}"
