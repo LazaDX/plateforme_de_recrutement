@@ -20,8 +20,8 @@ class CreateOffres extends Migration
             $table->date('date_debut');
             $table->date('date_limite');
             $table->foreignId('administrateur_id')->constrained('administrateurs')->onDelete('cascade');
-            $table->string('status_offre'); // 'broullion'
-            $table->string('priorite')->default('normal'); // 'urgent', 'haute', 'basse'
+            $table->string('status_offre'); // 'broullion', 'publiée', 'fermée'
+            $table->string('priorite')->default('normal'); // 'urgent', 'haute',
             $table->timestamps();
         });
     }

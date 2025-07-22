@@ -1,8 +1,25 @@
-@extends('backOffice.layouts.admin')
+<!DOCTYPE html>
+<html lang="en">
 
-@section('title', 'Connexion')
+<head>
+    <meta charset="UTF-8">
+    <title>@yield('title', 'Administrateur')</title>
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <script src="{{ mix('js/app.js') }}" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="//unpkg.com/alpinejs" defer></script>
+    @livewireStyles
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7fafc;
+        }
+    </style>
+</head>
 
-@section('content')
+<body>
     <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-4 text-center">Connexion Admin</h2>
 
@@ -12,7 +29,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}" class="space-y-4">
+        <form method="POST" action="{{ route('admin.login') }}" class="space-y-4">
             @csrf
 
             <div>
@@ -40,4 +57,6 @@
             </div>
         </form>
     </div>
-@endsection
+</body>
+
+</html>
