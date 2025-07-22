@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ReponsesFormulaires extends Model
+use App\Models\PostuleOffre;
+use App\Models\QuestionFormulaire;
+
+class ReponseFormulaire extends Model
 {
     use HasFactory;
     protected $table = 'reponses_formulaires';

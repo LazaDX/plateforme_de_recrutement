@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Administrateur;
 
-class Directions extends Model
+class Direction extends Model
 {
     use HasFactory;
     protected $table = 'directions';
@@ -14,8 +15,8 @@ class Directions extends Model
         'nom_direction'
     ];
 
-    public function administrateurs()
+    public function administrateur()
     {
-        return $this->hasMany(Administrateurs::class, 'direction_id');
+        return $this->hasMany(Administrateur::class, 'direction_id');
     }
 }

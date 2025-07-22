@@ -2,40 +2,29 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Http\Controllers\OffresController;
-use Http\Controllers\QuestionsFormulairesController;
-use Http\Controllers\PostuleOffresController;
-use Http\Controllers\ReponsesFormulairesController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+use App\Http\Controllers\OffreController;
+use App\Http\Controllers\QuestionFormulaireController;
+use App\Http\Controllers\PostuleOffreController;
+use App\Http\Controllers\ReponseFormulaireController;
 
 
-Route::middleware('auth:sanctum')->group(function () {
- // CRUD Offres
-    Route::apiResource('offres', OffresController::class);
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
-    // CRUD Questions liées à une offre
-    Route::apiResource('offres.questions', QuestionsFormulairesController::class)
+// Route::middleware('auth:sanctum')->group(function () {
+
+// });
+
+Route::apiResource('offres', OffreController::class);
+
+Route::apiResource('offres.questions', QuestionFormulaireController::class)
          ->shallow(); // pour ne pas avoir toujours /offres/{offre}/questions/{id}
 
-    // Postuler à une offre
-    Route::apiResource('offres.postules', PostuleOffresController::class)
+
+Route::apiResource('offres.postules', PostuleOffreController::class)
          ->shallow();
 
-    // Réponses aux formulaires
-    Route::apiResource('postules.reponses', ReponsesFormulairesController::class)
+
+Route::apiResource('postules.reponses', ReponseFormulaireController::class)
          ->shallow();
-});

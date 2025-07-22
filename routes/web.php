@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-Route::get('/enqueteur/offres', function () {
+Route::get('/enqueteur/offre', function () {
     return view('frontOffice.pages.offres');
-})->middleware(['auth'])->name('enqueteur.offres');
+})->middleware(['auth'])->name('enqueteur.offre');
 
 require __DIR__.'/auth.php';
 

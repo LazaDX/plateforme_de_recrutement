@@ -5,22 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AccesOffres extends Model
+use App\Models\Offre;
+
+class Visiteur extends Model
 {
     use HasFactory;
-    protected $table = 'acces_offres';
+    protected $table = 'visiteurs';
 
     protected $fillable = [
-        'id','offre_id', 'administrateur_id', 'etat'
+        'id','offre_id', 'nombre_visiteurs'
     ];
 
     public function offre()
     {
         return $this->belongsTo(Offre::class);
-    }
-
-    public function administrateur()
-    {
-        return $this->belongsTo(Administrateur::class);
     }
 }

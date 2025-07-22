@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Offres;
 
-class OffresController extends Controller
+use App\Models\Offre;
+use App\Models\PostuleOffre;
+use App\Models\QuestionFormulaire;
+
+class OffreController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +17,7 @@ class OffresController extends Controller
      */
     public function index()
     {
-        $offres = Offre::with('questionsFormulaires', 'postulesOffres')->get();
+        $offres = Offre::with('questionFormulaire', 'postuleOffre')->get();
         return response()->json($offres);
     }
 
@@ -46,9 +49,9 @@ class OffresController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Offres $offre)
+    public function show(Offre $offre)
     {
-        return response()->json($offre->load('questionsFormulaires', 'postulesOffres'));
+        return response()->json($offre->load('questionFormulaire', 'postuleOffre'));
     }
 
     /**
@@ -58,7 +61,7 @@ class OffresController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Offres $offres)
+    public function update(Request $request, Offre $offre)
     {
          $data = $request->validate([
             'nom_enquete'  => 'sometimes|required|string|max:255',
@@ -79,7 +82,7 @@ class OffresController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Offre $offre)
     {
          $offre->delete();
         return response()->json(['message' => 'Offre supprimée']);
