@@ -18,7 +18,7 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::get('/offers', function() {
         return view('backOffice.pages.offer');
-    })->name('offers');
+    })->name('offer');
 
     Route::get('/profile', function() {
         return view('backOffice.pages.profile');

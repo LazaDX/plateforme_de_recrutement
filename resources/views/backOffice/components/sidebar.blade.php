@@ -25,7 +25,7 @@
         </a>
 
         <a href="{{ route('admin.offer') }}"
-            class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.offers') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+            class="flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.offer') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
             <i class="fas fa-briefcase mr-3 h-5 w-5"></i>
             Offres d'enquêtes
         </a>
