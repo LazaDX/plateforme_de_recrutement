@@ -14,7 +14,8 @@
     {{-- Navbar --}}
     @include('backOffice.components.navbar')
 
-    {{-- Sidebar --}}
+    {{-- Sidebar + Main content--}}
+    
 
     {{-- Contenu principal --}}
     <main class="p-6">

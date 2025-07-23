@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Roles;
 
 class AdminAuthController extends Controller
 {
-     public function create()
+    public function create()
     {
-        return view('backOffice.auth.login');
+        $roles = Roles::get();
+        return view('backOffice.auth.login', ['roles' => $roles]);
     }
 
     /**
@@ -30,6 +32,7 @@ class AdminAuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            
         ]);
 
         if (Auth::guard('admin')->attempt($credentials)) {
