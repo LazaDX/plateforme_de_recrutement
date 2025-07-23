@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Roles extends Model
+use App\Models\Administrateur;
+
+class Role extends Model
 {
     use HasFactory;
     protected $table = 'roles';
@@ -14,9 +16,9 @@ class Roles extends Model
         'nom_role'
     ];
 
-    public function administrateurs()
+    public function administrateur()
     {
-        return $this->hasMany(Administrateurs::class, 'role_id');
+        return $this->hasMany(Administrateur::class, 'role_id');
     }
 }
 

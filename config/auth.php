@@ -23,11 +23,11 @@ return [
     'providers' => [
         'enqueteurs' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Enqueteurs::class,
+            'model' => App\Models\Enqueteur::class,
         ],
         'administrateurs' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Administrateurs::class,
+            'model' => App\Models\Administrateur::class,
         ],
     ],
 

@@ -21,50 +21,10 @@
 
 <body class="min-h-screen bg-gray-100">
     <div class="flex flex-col md:flex-row h-screen">
-        <!-- Left Column - Image -->
-        <div class="hidden md:block md:w-1/2 bg-gray-800 relative overflow-hidden">
-            <img src="{{ asset('img/instat-img-login.jpg') }}" alt="Enquêteur au travail"
-                class="w-full h-full object-cover opacity-50">
 
-            <div class="absolute inset-0 bg-blue-900 opacity-30"></div>
-
-            <div class="absolute inset-0 z-10 flex flex-col justify-center px-12 text-white">
-                <div class="mb-8">
-                    <div class="text-4xl font-sans font-bold mb-2">INSTAT Madagascar</div>
-                    {{-- <img src="{{ asset('img/instat-logo.png') }}" class="h-40 mb-2" alt=""> --}}
-                    {{-- <div class="text-xl">Portail Enquêteur</div> --}}
-                </div>
-
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-white bg-opacity-20 rounded-full shadow-md">
-                            <i class="fas fa-clipboard-check text-white "></i>
-                        </div>
-                        <p class="text-white text-xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">Collecte de
-                            données
-                            sécurisée</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-white bg-opacity-20 rounded-full">
-                            <i class="fas fa-cogs text-white"></i>
-                        </div>
-                        <span class="text-white text-xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">Gestion
-                            simplifiée</span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-white bg-opacity-20 rounded-full">
-                            <i class="fas fa-cloud-upload-alt text-white"></i>
-                        </div>
-                        <span class="text-white text-xl"
-                            style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">Synchronisation des données</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column - Login Form -->
-        <div class="w-full md:w-1/2 flex items-center justify-center p-6 bg-white">
-            <div class="w-full max-w-md">
+        <!-- Left Column - Login Form -->
+        <div class="w-full md:w-1/2 flex items-center justify-center p-4 bg-white">
+            <div class="w-full max-w-sm">
                 <div class="text-center mb-8">
 
                     {{-- <h2 class="text-2xl font-bold text-gray-400 mb-2">Connexion</h2> --}}
@@ -137,6 +97,68 @@
                         </a>
                     </div>
                 </form>
+            </div>
+        </div>
+        <!-- Left Column - Image -->
+        <div class="hidden md:block md:w-1/2 relative overflow-hidden bg-gray-900">
+            <!-- Image avec flou et animation au survol -->
+            <img src="{{ asset('img/instat-img-login.jpeg') }}" alt="Enquêteur au travail"
+                class="w-full h-full object-cover opacity-50 blur-md hover:blur-sm hover:opacity-80 transition-all duration-500 ease-in-out transform hover:scale-105">
+
+            <!-- Overlay dégradé pour meilleure lisibilité -->
+            <div class="absolute inset-0 bg-gradient-to-t from-blue-850/70 via-blue-700/40 to-transparent"></div>
+
+            <!-- Contenu texte amélioré -->
+            <div class="absolute inset-0 z-10 flex flex-col justify-center px-12 text-white space-y-8">
+                <!-- Titre avec animation -->
+                <div class="mb-8 transform transition-all duration-500 hover:scale-105 hover:pl-4">
+                    <div class="text-5xl font-bold font-sans tracking-tight mb-2 text-white drop-shadow-2xl">
+                        Instat Madagascar
+                    </div>
+                    <div class="w-24 h-1.5 bg-blue-400 mt-4 rounded-full"></div>
+                </div>
+
+                <!-- Liste des features avec effets -->
+                <div class="space-y-6 max-w-md">
+                    <!-- Item 1 -->
+                    <div class="flex items-start space-x-4 group">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-blue-500/80 transition-all duration-300 shadow-lg">
+                            <i class="fas fa-clipboard-check text-xl text-white"></i>
+                        </div>
+                        <p
+                            class="text-xl font-medium text-white/90 group-hover:text-white transition-all duration-300 pt-1 drop-shadow-lg">
+                            Collecte de données sécurisée et <span
+                                class="text-blue-300 group-hover:underline">chiffrée</span>
+                        </p>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="flex items-start space-x-4 group">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-blue-500/80 transition-all duration-300 shadow-lg">
+                            <i class="fas fa-cogs text-xl text-white"></i>
+                        </div>
+                        <p
+                            class="text-xl font-medium text-white/90 group-hover:text-white transition-all duration-300 pt-1 drop-shadow-lg">
+                            Interface <span class="text-blue-300">intuitive</span> et gestion simplifiée
+                        </p>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="flex items-start space-x-4 group">
+                        <div
+                            class="p-3 bg-white/10 rounded-xl backdrop-blur-sm group-hover:bg-blue-500/80 transition-all duration-300 shadow-lg">
+                            <i class="fas fa-cloud-upload-alt text-xl text-white"></i>
+                        </div>
+                        <p
+                            class="text-xl font-medium text-white/90 group-hover:text-white transition-all duration-300 pt-1 drop-shadow-lg">
+                            Synchronisation <span class="text-blue-300">en temps réel</span> des données
+                        </p>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>

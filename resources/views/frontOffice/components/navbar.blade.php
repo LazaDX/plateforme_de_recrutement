@@ -10,7 +10,7 @@
             {{-- Navigation --}}
             <nav class="hidden lg:flex flex-1 justify-center">
                 <div class="flex space-x-8">
-                    @foreach ([['name' => "Offre d'enquête", 'href' => '/enqueteur/offres'], ['name' => 'Mes candidatures', 'href' => '/enqueteur/candidatures'], ['name' => 'Tableau de bord', 'href' => '/enqueteur/dashboard']] as $item)
+                    @foreach ([['name' => "Offre d'enquête", 'href' => '/enqueteur/offre'], ['name' => 'Mes candidatures', 'href' => '/enqueteur/candidatures'], ['name' => 'Tableau de bord', 'href' => '/enqueteur/dashboard']] as $item)
                         <a href="{{ $item['href'] }}"
                             class="relative px-3 py-2 text-sm font-medium group {{ request()->is(ltrim($item['href'], '/') . '*') ? 'text-blue-950' : 'text-gray-600 hover:text-green-900' }}">
                             {{ $item['name'] }}
@@ -26,7 +26,7 @@
             {{-- Avatar + Dropdown --}}
             <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                 @auth
-                    <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
+                    <button @click="open = !open" class="flex items-center space-x-2 pl-6 p-2 rounded-lg">
 
                         @if (Auth::user()->photo)
                             <img src="{{ Auth::user()->photo }}" alt="{{ Auth::user()->nom }}"

@@ -5,7 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PostuleOffres extends Model
+use App\Models\Offre;
+use App\Models\Enqueteur;
+use App\Models\ReponsesFormulaire;
+
+
+class PostuleOffre extends Model
 {
     use HasFactory;
     protected $table = 'postules_offres';
@@ -24,8 +29,8 @@ class PostuleOffres extends Model
         return $this->belongsTo(Enqueteur::class);
     }
 
-    public function reponsesFormulaire()
+    public function reponseFormulaire()
     {
-        return $this->hasMany(ReponseFormulaire::class, 'postuleoffre_id');
+        return $this->hasMany(ReponseFormulaire::class, 'postule_offre_id');
     }
 }

@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Postes extends Model
+use App\Models\Administrateur;
+
+class Poste extends Model
 {
     use HasFactory;
     protected $table = 'postes';
@@ -14,8 +16,8 @@ class Postes extends Model
         'nom_poste'
     ];
 
-    public function administrateurs()
+    public function administrateur()
     {
-        return $this->hasMany(Administrateurs::class, 'poste_id');
+        return $this->hasMany(Administrateur::class, 'poste_id');
     }
 }

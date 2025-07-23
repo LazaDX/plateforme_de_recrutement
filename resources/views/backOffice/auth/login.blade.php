@@ -1,38 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connexion | INSTAT-Admin</title>
 
-    <!-- Tailwind CSS -->
+<head>
+    <meta charset="UTF-8">
+    <title>@yield('title', 'Administrateur')</title>
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <script src="{{ mix('js/app.js') }}" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Alpine.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="//unpkg.com/alpinejs" defer></script>
+    @livewireStyles
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7fafc;
+        }
+    </style>
 </head>
 
-<body x-data="{ darkMode: false }"
-      x-init="darkMode = JSON.parse(localStorage.getItem('darkMode') || false); $watch('darkMode', val => localStorage.setItem('darkMode', JSON.stringify(val)))"
-      :class="{ 'dark bg-gray-900 text-white': darkMode }"
-      class="relative min-h-screen flex items-center justify-center font-[Poppins] overflow-hidden">
+<body>
+    <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4 text-center">Connexion Admin</h2>
 
     <!-- Background image floue et sombre -->
     <div class="absolute inset-0 z-0 bg-cover bg-center filter blur-sm brightness-75"
          style="background-image: url('{{ asset('img/instat-img-login.jpg') }}');">
     </div>
 
-    <!-- Contenu principal (formulaire) -->
-    <div class="relative z-10 w-full max-w-md mx-auto p-6 bg-white/80 dark:bg-gray-800/80 shadow-lg rounded-lg backdrop-blur-md" style="background-color: #ffff">
-        <div class="mb-6 text-center">
-            <h1 class="text-2xl font-bold mb-1 dark:text-white">Système de recrutement INSTAT</h1>
-        </div>
-
-        <!-- Login Form -->
-        <form method="POST" action="/login">
+        <form method="POST" action="{{ route('admin.login') }}" class="space-y-4">
             @csrf
             
             <div class="flex gap-4 mb-4">
@@ -84,6 +80,6 @@
             </button>
         </form>
     </div>
-
 </body>
+
 </html>
