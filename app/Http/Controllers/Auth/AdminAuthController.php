@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Roles;
+use App\Models\Role;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +13,9 @@ class AdminAuthController extends Controller
 {
     public function create()
     {
-        $roles = Roles::get();
-        return view('backOffice.auth.login', ['roles' => $roles]);
+        //$roles = Role::get();
+        //return view('backOffice.auth.login', ['roles' => $roles]);
+        return view('backOffice.auth.login');
     }
 
     /**

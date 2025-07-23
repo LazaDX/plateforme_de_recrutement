@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Enqueteurs;
+use App\Models\Enqueteur;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -40,7 +40,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $enqueteurs = Enqueteurs::create([
+        $enqueteurs = Enqueteur::create([
             'nom' => $request->nom,
             'prenom' => $request->prenom,
             'email' => $request->email,
