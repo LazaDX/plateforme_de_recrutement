@@ -17,8 +17,9 @@ class CreateOffres extends Migration
             $table->id();
             $table->string('nom_enquete');
             $table->text('details_enquete');
-            $table->date('date_debut');
-            $table->date('date_limite');
+            $table->date('date_debut')->nullable();
+            $table->date('date_limite')->nullable();
+            $table->foreignId('region_id')->nullable()->constrained('regions')->nullOnDelete();
             $table->foreignId('administrateur_id')->constrained('administrateurs')->onDelete('cascade');
             $table->string('status_offre'); // 'broullion', 'publiée', 'fermée'
             $table->string('priorite')->default('normal'); // 'urgent', 'haute',

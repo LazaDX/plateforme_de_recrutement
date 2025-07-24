@@ -11,4 +11,9 @@ class Region extends Model
     protected $table = 'regions';
 
     protected $fillable = ['id','nom_region'];
+
+    public function offre()
+    {
+        return $this->hasMany(Offre::class, 'region_id');
+    }
 }

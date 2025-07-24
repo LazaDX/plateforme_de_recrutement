@@ -44,4 +44,9 @@ class Offre extends Model
     {
         return $this->hasMany(Visiteur::class, 'offre_id');
     }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class, 'region_id');
+    }
 }

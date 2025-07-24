@@ -1,14 +1,13 @@
 <nav class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-
-            {{-- Logo --}}
-            <div class="flex items-center">
+            {{-- Logo à gauche --}}
+            <div class="flex-shrink-0">
                 <img src="{{ asset('img/instat-logo.png') }}" alt="logo" class="h-12 cursor-pointer" />
             </div>
 
-            {{-- Navigation --}}
-            <nav class="hidden lg:flex flex-1 justify-center">
+            {{-- Navigation au centre (optionnel : s'affiche sur grand écran seulement) --}}
+            <div class="hidden lg:flex flex-1 justify-center">
                 <div class="flex space-x-8">
                     @foreach ([['name' => "Offre d'enquête", 'href' => '/enqueteur/offre'], ['name' => 'Mes candidatures', 'href' => '/enqueteur/candidatures'], ['name' => 'Tableau de bord', 'href' => '/enqueteur/dashboard']] as $item)
                         <a href="{{ $item['href'] }}"
@@ -16,25 +15,25 @@
                             {{ $item['name'] }}
                             <span
                                 class="absolute bottom-0 left-3 h-0.5 transition-all duration-300
-                    {{ request()->is(ltrim($item['href'], '/') . '*') ? 'w-10 bg-blue-600' : 'w-0 group-hover:w-10 group-hover:bg-gray-300' }}">
+                        {{ request()->is(ltrim($item['href'], '/') . '*') ? 'w-10 bg-blue-600' : 'w-0 group-hover:w-10 group-hover:bg-gray-300' }}">
                             </span>
                         </a>
                     @endforeach
                 </div>
-            </nav>
+            </div>
 
-            {{-- Avatar + Dropdown --}}
-            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+            {{-- Profil utilisateur à droite --}}
+            <div class="flex-shrink-0 pl-4 relative" x-data="{ open: false }" @click.outside="open = false">
                 @auth
-                    <button @click="open = !open" class="flex items-center space-x-2 pl-6 p-2 rounded-lg">
-
+                    <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg">
                         @if (Auth::user()->photo)
                             <img src="{{ Auth::user()->photo }}" alt="{{ Auth::user()->nom }}"
                                 class="w-8 h-8 rounded-full object-cover" />
                         @else
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <span
-                                    class="text-gray-600 font-medium text-sm">{{ strtoupper(substr(Auth::user()->nom, 0, 1)) }}</span>
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-right">
+                                <span class="text-gray-600 font-medium text-sm">
+                                    {{ strtoupper(substr(Auth::user()->nom, 0, 1)) }}
+                                </span>
                             </div>
                         @endif
                         <span class="hidden md:block text-sm font-medium text-gray-900">{{ Auth::user()->nom }}</span>
@@ -67,7 +66,7 @@
                     </a>
                 @endauth
             </div>
-
         </div>
+
     </div>
 </nav>
