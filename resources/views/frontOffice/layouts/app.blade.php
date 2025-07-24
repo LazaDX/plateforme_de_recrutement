@@ -13,7 +13,7 @@
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-gray-50">
+<body class="w-full bg-gray-50">
 
     {{-- Navbar --}}
     @include('frontOffice.components.navbar')
@@ -26,6 +26,7 @@
     @include('frontOffice.components.footer')
     {{-- Scripts --}}
     @livewireScripts
+    @livewireStyles
 </body>
 
 </html>
