@@ -10,6 +10,7 @@ use App\Models\Administrateur;
 use App\Models\PostuleOffre;
 use App\Models\AccesOffre;
 use App\Models\Visiteur;
+use App\Models\Region;
 
 class Offre extends Model
 {

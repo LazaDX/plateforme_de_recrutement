@@ -25,13 +25,13 @@
             {{-- Profil utilisateur à droite --}}
             <div class="flex-shrink-0 pl-4 relative" x-data="{ open: false }" @click.outside="open = false">
                 @auth
-                    <button @click="open = !open" class="flex items-center space-x-2 p-2 rounded-lg">
+                    <button @click="open = !open" class="flex items-center space-x-2 p-2 border- rounded-lg">
                         @if (Auth::user()->photo)
                             <img src="{{ Auth::user()->photo }}" alt="{{ Auth::user()->nom }}"
                                 class="w-8 h-8 rounded-full object-cover" />
                         @else
-                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-right">
-                                <span class="text-gray-600 font-medium text-sm">
+                            <div class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-right    ">
+                                <span class="text-gray-600 font-medium text-xs">
                                     {{ strtoupper(substr(Auth::user()->nom, 0, 1)) }}
                                 </span>
                             </div>
@@ -50,7 +50,7 @@
                             <i class="fas fa-user mr-2"></i>
                             Mon profil
                         </a>
-                        <form method="POST" action="{{ route('enqueteur.logout') }}">
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
                                 class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-50">
