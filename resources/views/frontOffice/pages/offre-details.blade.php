@@ -199,6 +199,26 @@
                                                     class="pl-10 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" rows="3"
                                                     @if ($question->required) required @endif></textarea>
                                             </div>
+                                        @elseif($question->type === 'nombre')
+                                            <div class="relative">
+                                                <div
+                                                    class="absolute inset-y-0 left-0 pl-3 pt-2 flex items-start pointer-events-none text-gray-400">
+                                                    <i class="fas fa-align-left"></i>
+                                                </div>
+                                              <input type="number" name="reponses[{{ $question->id }}]"
+                                                    class="pl-10 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    @if ($question->required) required @endif>
+                                            </div>
+                                        @elseif($question->type === 'email')
+                                            <div class="relative">
+                                                <div
+                                                    class="absolute inset-y-0 left-0 pl-3 pt-2 flex items-start pointer-events-none text-gray-400">
+                                                    <i class="fas fa-align-left"></i>
+                                                </div>
+                                              <input type="email" name="reponses[{{ $question->id }}]"
+                                                    class="pl-10 w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    @if ($question->required) required @endif>
+                                            </div>
                                         @elseif($question->type === 'choix_multiple')
                                             <div class="relative">
                                                 <div
@@ -233,7 +253,7 @@
                                         class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                                         <i class="fas fa-times mr-2"></i> Annuler
                                     </button>
-                                    <button type="submit" id="submitBtn"
+                                    <button type="submit" 
                                         class="px-4 py-2 bg-blue-800 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         <i class="fas fa-paper-plane mr-2"></i> Envoyer
                                     </button>
@@ -247,14 +267,11 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const modal = document.getElementById('applicationModal');
+                
                 const openModalBtn = document.getElementById('openModalBtn');
                 const closeModalBtn = document.getElementById('closeModalBtn');
                 const cancelBtn = document.getElementById('cancelBtn');
-                const applicationForm = document.getElementById('applicationForm');
-                const submitBtn = document.getElementById('submitBtn');
-                const submitText = document.getElementById('submitText');
-                const submitLoading = document.getElementById('submitLoading');
+                
 
                 // Gestion de l'ouverture du modal
                 openModalBtn.addEventListener('click', function() {
@@ -278,15 +295,15 @@
                     }
                 });
 
-                // Soumission du formulaire
-                applicationForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
+                // // Soumission du formulaire
+                // applicationForm.addEventListener('submit', function(e) {
+                //     e.preventDefault();
 
-                    // Afficher l'indicateur de chargement
-                    submitText.classList.add('hidden');
-                    submitLoading.classList.remove('hidden');
-                    submitBtn.disabled = true;
-                });
+                //     // Afficher l'indicateur de chargement
+                //     // submitText.classList.add('hidden');
+                //     // submitLoading.classList.remove('hidden');
+                //     // submitBtn.disabled = true;
+                // });
             });
         </script>
     </div>
