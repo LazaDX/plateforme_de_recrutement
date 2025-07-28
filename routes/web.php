@@ -3,29 +3,28 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Livewire\OffreLivewire;
+use App\Http\Controllers\OffreController;
+use App\Http\Controllers\PostuleOffreController;
+use App\Models\Offre;
+use App\Models\Region;
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/offres', OffreLivewire::class)->name('offres.index');
-    Route::get('/enqueteur/offre', OffreLivewire::class)->name('enqueteur.offre');
 
-});
+Route::get('/enqueteur/offre', [OffreController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('enqueteur.offre');
+
+Route::get('/enqueteur/offre/{offre}', [OffreController::class, 'show'])
+    ->middleware(['auth'])
+    ->name('enqueteur.offre.show');
+
+
+Route::post('/offres/{offre}/postuler', [PostuleOffreController::class, 'store'])
+    ->name('offres.postuler')
+    ->middleware('auth');
+
+// Route::get('/enqueteur/postule', function(){
+// return view('frontOffice.pages.postule-offre');
+// })->middleware(['auth'])->name('enqueteur.postule');
+
 
 require __DIR__.'/auth.php';
-
-// Route::get('/enqueteur/offre', function () {
-//     return view('frontOffice.pages.offre');
-// })->middleware(['auth'])->name('enqueteur.offre');
-
-// Route::get('/offres', \App\Http\Livewire\JobOffers::class)->name('offres.index');
-
-// require __DIR__.'/auth.php';
-
-
-
-// Route::get('/offres', \App\Http\Livewire\OffreLivewire::class)->name('offres.index');
-// Route::get('/enqueteur/offre', function() {
-//     return view('frontOffice.pages.offre');
-// })->middleware(['auth'])->name('enqueteur.offre');
-// Route::get('/postuler/{offre}', [PostuleController::class, 'create'])->name('postuler');
-
-// require __DIR__.'/auth.php';

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Offre;
 use App\Models\PostuleOffre;
+use App\Models\ReponseFormulaire;
 
 class PostuleOffreController extends Controller
 {
@@ -27,15 +28,42 @@ class PostuleOffreController extends Controller
      */
     public function store(Request $request, Offre $offre)
     {
-        $data = $request->validate([
-            'enqueteur_id'  => 'required|exists:enqueteurs,id',
-            'date_postule' => 'nullable|date',
-            'type_enqueteur'=> 'nullable|string',
-            'status_postule'=> 'nullable|string',
+        // $data = $request->validate([
+        //     'enqueteur_id'  => 'required|exists:enqueteurs,id',
+        //     'date_postule' => 'nullable|date',
+        //     'type_enqueteur'=> 'nullable|string',
+        //     'status_postule'=> 'nullable|string',
+        // ]);
+
+        // $postule = $offre->postuleOffre()->create($data);
+        // return response()->json($postule, 201);
+
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vous devez être connecté pour postuler.');
+        }
+
+        $request->validate([
+        'reponses' => 'required|array',
         ]);
 
-        $postule = $offre->postuleOffre()->create($data);
-        return response()->json($postule, 201);
+        $postule = PostuleOffre::create([
+        'offre_id' => $offre->id,
+        'enqueteur_id' => auth()->id(),
+        'date_postule' => now(),
+        'type_enqueteur' => $request->input('type_enqueteur', 'standard'),
+        'status_postule' => 'en attente',
+        ]);
+
+        foreach ($request->reponses as $questionId => $valeur) {
+        ReponseFormulaire::create([
+            'postule_offre_id' => $postule->id,
+            'question_id' => $questionId,
+            'valeur' => $valeur,
+        ]);
+        }
+
+       return redirect()->route('enqueteur.offre.show', $offre->id)
+            ->with('success', 'Votre candidature a été envoyée avec succès !');
     }
 
     /**

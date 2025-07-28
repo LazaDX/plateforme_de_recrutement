@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Offre;
 use App\Models\PostuleOffre;
 use App\Models\QuestionFormulaire;
+use App\Models\Region;
 
 class OffreController extends Controller
 {
@@ -15,10 +16,32 @@ class OffreController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $offres = Offre::with('questionFormulaire', 'postuleOffre')->get();
-        return response()->json($offres);
+        // $offres = Offre::with('questionFormulaire', 'postuleOffre')->get();
+        // return response()->json($offres);
+
+        $search = $request->input('search');
+        $regionId = $request->input('region');
+
+        $query = Offre::query()->with(['questionFormulaire', 'postuleOffre', 'region']);
+
+        if ($search) {
+            $query->where('nom_enquete', 'like', "%{$search}%")
+                ->orWhere('details_enquete', 'like', "%{$search}%");
+
+        }
+
+        if ($regionId && $regionId !== 'all') {
+            $query->where('region_id', $regionId);
+        }
+
+        $offres = $query->paginate(10);
+        $regions = Region::all();
+
+        $viewMode = $request->input('view', 'list');
+
+        return view('frontOffice.pages.offre', compact('offres', 'regions', 'viewMode', 'search'));
     }
 
     /**
@@ -51,7 +74,10 @@ class OffreController extends Controller
      */
     public function show(Offre $offre)
     {
-        return response()->json($offre->load('questionFormulaire', 'postuleOffre'));
+        // return response()->json($offre->load('questionFormulaire', 'postuleOffre'));
+        // $offre->load('questionFormulaire', 'postuleOffre');
+       $offre->load('region', 'questionFormulaire', 'postuleOffre');
+        return view('frontOffice.pages.offre-details', compact('offre'));
     }
 
     /**
