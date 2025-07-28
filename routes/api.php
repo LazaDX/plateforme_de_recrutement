@@ -18,6 +18,11 @@ use App\Http\Controllers\ReponseFormulaireController;
 
 Route::apiResource('offres', OffreController::class);
 
+// Route::post("/create_offre", [OffreController::class, 'store']);
+Route::group(['prefix' => 'offre'], function($group) {
+    $group->post('/create_offres', [OffreController::class, 'store']);
+});
+
 Route::apiResource('offres.questions', QuestionFormulaireController::class)
          ->shallow(); // pour ne pas avoir toujours /offres/{offre}/questions/{id}
 

@@ -8,6 +8,7 @@ use App\Models\Offre;
 use App\Models\PostuleOffre;
 use App\Models\QuestionFormulaire;
 
+
 class OffreController extends Controller
 {
     /**
@@ -29,18 +30,39 @@ class OffreController extends Controller
      */
     public function store(Request $request)
     {
-         $data = $request->validate([
-            'nom_enquete'       => 'required|string|max:255',
-            'details_enquete'   => 'nullable|string',
-            'date_debut'        => 'nullable|date',
-            'date_limite'       => 'required|date|after_or_equal:date_debut',
-            'administrateur_id' => 'required|exists:administrateurs,id',
-            'status_offre'      => 'nullable|string',
-            'priorite'          => 'nullable|string',
-        ]);
+        
+        try {
+            $form = $request->input("form");
+            $formulaire = $request->input("formulaire");
+        
+            $offre = Offre::create([
+                'nom_enquete' => $form['nom_enquete'],
+                'details_enquete' => $form['details_enquete'],
+                'date_debut' => $form['date_debut'],
+                'date_limite' => $form['date_limite'],
+                // 'administrateur_id' => $form['administrateur_id'],
+                 'administrateur_id' => 1,
+                'status_offre' => $form['status_offre'],
+                'priorite' => $form['priorite']
+            ]); 
 
-        $offre = Offre::create($data);
-        return response()->json($offre, 201);
+            $offre_id = $offre->id;
+            if ($offre_id && $offre) {
+                foreach ($formulaire as $question) {
+                    QuestionFormulaire::create([
+                        'offre_id' => $offre->id,
+                        'label' => $question['label'],
+                        'type' => $question['type'],
+                        'obligation' => $question['obligation']
+                    ]);
+                }   
+            }
+            
+            return response()->json($offre, 201);
+
+         } catch (\Throwable $th) {
+            return response()->json(['error' => $th->getMessage()], 500);
+         }
     }
 
     /**
