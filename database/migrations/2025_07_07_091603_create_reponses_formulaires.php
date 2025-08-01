@@ -17,7 +17,10 @@ class CreateReponsesFormulaires extends Migration
             $table->id();
             $table->foreignId('postule_offre_id')->constrained('postules_offres')->onDelete('cascade');
             $table->foreignId('question_id')->constrained('questions_formulaires')->onDelete('cascade');
-            $table->string('valeur'); // La réponse à la question
+            $table->foreignId('region_id')->nullable()->constrained('regions')->nullOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained('districts')->nullOnDelete();
+            $table->foreignId('commune_id')->nullable()->constrained('communes')->nullOnDelete();
+            $table->string('valeur');
             $table->timestamps();
         });
     }

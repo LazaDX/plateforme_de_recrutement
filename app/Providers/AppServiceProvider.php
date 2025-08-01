@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
         Blade::component('frontOffice.components.ui.modal', 'ui.modal');
         Blade::component('frontOffice.components.ui.button', 'ui.button');
         Blade::component('frontOffice.components.ui.card', 'ui.card');

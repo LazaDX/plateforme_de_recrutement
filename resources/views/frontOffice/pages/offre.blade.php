@@ -96,24 +96,6 @@
                                     </div>
                                 </div> --}}
                             </div>
-
-                            <div class="flex flex-col md:flex-row items-center gap-4">
-                                <input type="text" name="search" value="{{ request('search') }}"
-                                    placeholder="Rechercher un poste..."
-                                    class="w-full md:w-1/2 rounded-full border px-4 py-2 hidden" />
-                                <select name="region" class="w-full md:w-1/3 rounded-full border px-4 py-2">
-                                    <option value="all">Toutes les régions</option>
-                                    @foreach ($regions as $region)
-                                        <option value="{{ $region->id }}"
-                                            {{ request('region') == $region->id ? 'selected' : '' }}>
-                                            {{ $region->nom_region }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                <button type="submit"
-                                    class="bg-transparent text-gray-500 hover:font-semibol px-4 py-2 rounded-full border border-gray-400 transition-all duration-200">Filtrer</button>
-                            </div>
                         </form>
                         @if ($viewMode === 'list')
                             @foreach ($offres as $offre)

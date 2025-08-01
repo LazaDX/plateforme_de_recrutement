@@ -10,6 +10,7 @@ use App\Models\QuestionFormulaire;
 use App\Models\Region;
 
 
+
 class OffreController extends Controller
 {
     /**
@@ -23,9 +24,8 @@ class OffreController extends Controller
         // return response()->json($offres);
 
         $search = $request->input('search');
-        $regionId = $request->input('region');
 
-        $query = Offre::query()->with(['questionFormulaire', 'postuleOffre', 'region']);
+        $query = Offre::query()->with(['questionFormulaire', 'postuleOffre']);
 
         if ($search) {
             $query->where('nom_enquete', 'like', "%{$search}%")
@@ -33,16 +33,10 @@ class OffreController extends Controller
 
         }
 
-        if ($regionId && $regionId !== 'all') {
-            $query->where('region_id', $regionId);
-        }
-
         $offres = $query->paginate(10);
-        $regions = Region::all();
-
         $viewMode = $request->input('view', 'list');
 
-        return view('frontOffice.pages.offre', compact('offres', 'regions', 'viewMode', 'search'));
+        return view('frontOffice.pages.offre', compact('offres', 'viewMode', 'search'));
     }
 
     /**
@@ -53,39 +47,89 @@ class OffreController extends Controller
      */
     public function store(Request $request)
     {
-        
         try {
             $form = $request->input("form");
             $formulaire = $request->input("formulaire");
-        
+
             $offre = Offre::create([
                 'nom_enquete' => $form['nom_enquete'],
                 'details_enquete' => $form['details_enquete'],
                 'date_debut' => $form['date_debut'],
                 'date_limite' => $form['date_limite'],
-                // 'administrateur_id' => $form['administrateur_id'],
-                 'administrateur_id' => 1,
+                'administrateur_id' => auth('admin')->id(),
                 'status_offre' => $form['status_offre'],
                 'priorite' => $form['priorite']
-            ]); 
+            ]);
 
-            $offre_id = $offre->id;
-            if ($offre_id && $offre) {
-                foreach ($formulaire as $question) {
-                    QuestionFormulaire::create([
-                        'offre_id' => $offre->id,
-                        'label' => $question['label'],
-                        'type' => $question['type'],
-                        'obligation' => $question['obligation']
-                    ]);
-                }   
+            foreach ($formulaire as $question) {
+                $all_regions = false;
+                $all_districts = false;
+                $all_communes = false;
+
+                if ($question['type'] === 'geographique') {
+                    switch ($question['constraint_level']) {
+                        case 'all':
+                            $all_regions = true;
+                            $all_districts = true;
+                            $all_communes = true;
+                            break;
+                        case 'region_district':
+                            $all_regions = true;
+                            $all_districts = true;
+                            $all_communes = false;
+                            break;
+                        case 'region':
+                            $all_regions = true;
+                            $all_districts = false;
+                            $all_communes = false;
+                            break;
+                        case 'district':
+                            $all_regions = false;
+                            $all_districts = true;
+                            $all_communes = false;
+                            break;
+                        case 'commune':
+                            $all_regions = false;
+                            $all_districts = false;
+                            $all_communes = true;
+                            break;
+                        case 'district_commune':
+                            $all_regions = false;
+                            $all_districts = true;
+                            $all_communes = true;
+                            break;
+                    }
+                }
+
+                QuestionFormulaire::create([
+                    'offre_id' => $offre->id,
+                    'label' => $question['label'],
+                    'type' => $question['type'],
+                    'obligation' => $question['obligation'],
+                    'all_regions' => $all_regions,
+                    'all_districts' => $all_districts,
+                    'all_communes' => $all_communes,
+                    'region_id' => $question['type'] === 'geographique' ? ($question['region_id'] ?? null) : null,
+                    'district_id' => $question['type'] === 'geographique' ? ($question['district_id'] ?? null) : null,
+                    'commune_id' => $question['type'] === 'geographique' ? ($question['commune_id'] ?? null) : null,
+                ]);
             }
-            
-            return response()->json($offre, 201);
 
-         } catch (\Throwable $th) {
-            return response()->json(['error' => $th->getMessage()], 500);
-         }
+            return response()->json([
+                'message' => 'Offre créée avec succès !',
+                'offre' => $offre
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation échouée',
+                'messages' => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            Log::error('Erreur lors de la création de l\'offre: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Erreur serveur: ' . $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -98,8 +142,14 @@ class OffreController extends Controller
     {
         // return response()->json($offre->load('questionFormulaire', 'postuleOffre'));
         // $offre->load('questionFormulaire', 'postuleOffre');
-       $offre->load('region', 'questionFormulaire', 'postuleOffre');
-        return view('frontOffice.pages.offre-details', compact('offre'));
+
+        $offre = Offre::with([
+            'questionFormulaire.region',
+            'questionFormulaire.district',
+            'questionFormulaire.commune'
+        ])->findOrFail($offre->id);
+        $regions = Region::select(['id', 'region'])->get();
+        return view('frontOffice.pages.offre-details', compact('offre', 'regions'));
     }
 
     /**

@@ -10,7 +10,6 @@ use App\Models\Administrateur;
 use App\Models\PostuleOffre;
 use App\Models\AccesOffre;
 use App\Models\Visiteur;
-use App\Models\Region;
 
 class Offre extends Model
 {
@@ -44,10 +43,5 @@ class Offre extends Model
     public function visiteur()
     {
         return $this->hasMany(Visiteur::class, 'offre_id');
-    }
-
-    public function region()
-    {
-        return $this->belongsTo(Region::class, 'region_id');
     }
 }
