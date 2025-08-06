@@ -161,17 +161,36 @@ class OffreController extends Controller
      */
     public function update(Request $request, Offre $offre)
     {
-         $data = $request->validate([
-            'nom_enquete'  => 'sometimes|required|string|max:255',
-            'details'      => 'nullable|string',
-            'date_debut'   => 'nullable|date',
-            'date_limite'  => 'sometimes|required|date|after_or_equal:date_debut',
-            'status_offre' => 'nullable|string',
-            'priorite'     => 'nullable|string',
+        //  $data = $request->validate([
+        //     'nom_enquete'  => 'sometimes|required|string|max:255',
+        //     'details'      => 'nullable|string',
+        //     'date_debut'   => 'nullable|date',
+        //     'date_limite'  => 'sometimes|required|date|after_or_equal:date_debut',
+        //     'status_offre' => 'nullable|string',
+        //     'priorite'     => 'nullable|string',
+        // ]);
+
+        // $offre->update($data);
+        // return response()->json($offre);
+        $form = $request->input("form");
+        $formulaire = $request->input("formulaire");
+
+        $validated = $request->validate([
+            'form.nom_enquete' => 'required|string|max:255',
+            'form.details_enquete' => 'required|string',
+            'form.date_debut' => 'nullable|date',
+            'form.date_limite' => 'required|date',
+            'form.priorite' => 'required|string',
+            'form.status_offre' => 'required|in:brouillon,publiee,fermee',
+            'formulaire' => 'required|array|min:1',
         ]);
 
-        $offre->update($data);
-        return response()->json($offre);
+        $offer->update($request->form);
+        // Gérer la mise à jour du formulaire dynamique (par exemple, supprimer les anciens champs et créer les nouveaux)
+        $offer->formulaire()->delete();
+        $offer->formulaire()->createMany($request->formulaire);
+
+        return response()->json(['message' => 'Offre mise à jour avec succès']);
     }
 
     /**
@@ -182,7 +201,30 @@ class OffreController extends Controller
      */
     public function destroy(Offre $offre)
     {
-         $offre->delete();
-        return response()->json(['message' => 'Offre supprimée']);
+       $offer = Offre::find($offre->id);
+        if (!$offer) {
+            return response()->json(['error' => 'Offer not found'], 404);
+        }
+
+        $offer->delete();
+        return response()->json(['success' => true]);
+    }
+
+    /* Administrateur fonction pour l'offre */
+    public function edit(Offre $offer)
+    {
+        return view('backOffice.pages.offer-edit', compact('offer'));
+    }
+
+    public function getAllOffers()
+    {
+        try {
+            $offers = Offre::all(); // Fetch all offers from the database
+            return response()->json($offers, 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error fetching offers: ' . $e->getMessage());
+            return response()->json(['error' => 'Unable to fetch offers'], 500);
+        }
     }
 }
