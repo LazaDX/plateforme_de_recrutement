@@ -393,8 +393,19 @@
         </form>
     </div>
 
+    <!-- Inclusion des bibliothèques nécessaires -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="https://unpkg.com/trix@2.0.0/dist/trix.css">
+    <link rel="stylesheet" href="https://unpkg.com/notyf@3/notyf.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/trix@2.0.0/dist/trix.umd.min.js"></script>
+    <script src="https://unpkg.com/notyf@3/notyf.min.js"></script>
+
     <script>
+        // Configuration globale d'Axios pour le jeton CSRF
+        axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').content;
+
         const {
             createApp
         } = Vue;
@@ -402,7 +413,7 @@
         createApp({
             data() {
                 return {
-                    offerId: {{ $offer->id }}, // ID de l'offre passé par Laravel
+                    offerId: {{ $offer->id }},
                     form: {
                         nom_enquete: '',
                         details_enquete: '',
@@ -416,7 +427,7 @@
                         type: 'texte',
                         label: '',
                         obligation: false,
-                        constraint_level: 'all',
+                        constraint_level: null,
                         region_id: null,
                         district_id: null,
                         commune_id: null,
@@ -434,6 +445,15 @@
                 };
             },
             mounted() {
+                if (typeof Notyf === 'undefined') {
+                    console.error('Notyf n\'est pas chargé');
+                    return;
+                }
+                if (typeof Trix === 'undefined') {
+                    console.error('Trix n\'est pas chargé');
+                    this.notyf.error('L\'éditeur de texte n\'est pas disponible.');
+                    return;
+                }
                 this.notyf = new Notyf({
                     duration: 4000,
                     position: {
@@ -443,8 +463,11 @@
                 });
                 this.loadRegions();
                 this.loadOfferData();
-                document.addEventListener('trix-change', () => {
-                    this.form.details_enquete = document.querySelector('#details_enquete').value;
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        this.initializeTrixEditor();
+                        this.loadOfferData();
+                    }, 100);
                 });
             },
             computed: {
@@ -488,6 +511,8 @@
                 'newField.type'() {
                     if (this.newField.type === 'geographique' && !this.newField.constraint_level) {
                         this.newField.constraint_level = 'all';
+                    } else if (this.newField.type !== 'geographique') {
+                        this.newField.constraint_level = null;
                     }
                 }
             },
@@ -495,10 +520,15 @@
                 async loadRegions() {
                     try {
                         const response = await axios.get('{{ route('admin.regions') }}');
+                        if (!Array.isArray(response.data)) {
+                            throw new Error('Les données des régions ne sont pas au format attendu.');
+                        }
                         this.regions = response.data;
                     } catch (error) {
                         console.error('Erreur chargement régions', error);
-                        this.notyf.error('Impossible de charger les régions');
+                        this.notyf.error(
+                            'Impossible de charger les régions. Vérifiez votre connexion ou contactez l’administrateur.'
+                        );
                     }
                 },
                 async loadDistricts(regionId) {
@@ -511,6 +541,9 @@
                     if (!regionId) return;
                     try {
                         const response = await axios.get(`{{ url('admin/regions') }}/${regionId}/districts`);
+                        if (!Array.isArray(response.data)) {
+                            throw new Error('Les données des districts ne sont pas au format attendu.');
+                        }
                         this.districts = response.data;
                     } catch (error) {
                         console.error('Erreur chargement districts', error);
@@ -524,6 +557,9 @@
                     if (!districtId) return;
                     try {
                         const response = await axios.get(`{{ url('admin/districts') }}/${districtId}/communes`);
+                        if (!Array.isArray(response.data)) {
+                            throw new Error('Les données des communes ne sont pas au format attendu.');
+                        }
                         this.communes = response.data;
                     } catch (error) {
                         console.error('Erreur chargement communes', error);
@@ -532,19 +568,40 @@
                 },
                 async loadOfferData() {
                     try {
-                        const response = await axios.get(
-                            `{{ route('admin.offers.show', ['offer' => $offer->id]) }}`);
+                        const response = await axios.get(`{{ url('admin/offers') }}/${this.offerId}`);
+                        console.log('Réponse de getOffer:', response.data);
                         const offer = response.data;
                         this.form = {
-                            nom_enquete: offer.nom_enquete,
-                            details_enquete: offer.details_enquete,
-                            date_debut: offer.date_debut,
-                            date_limite: offer.date_limite,
+                            nom_enquete: offer.nom_enquete || '',
+                            details_enquete: offer.details_enquete || '',
+                            date_debut: offer.date_debut || '',
+                            date_limite: offer.date_limite || '',
                             priorite: offer.priorite || 'moyenne',
                             status_offre: offer.status_offre || 'brouillon',
                         };
                         this.formulaire = offer.formulaire || [];
-                        // Charger les districts et communes pour les champs géographiques
+
+                        this.$nextTick(() => {
+                            const trixEditor = document.querySelector('trix-editor');
+                            const hiddenInput = document.querySelector('#details_enquete');
+
+                            if (trixEditor && hiddenInput) {
+                                // Mettre à jour le contenu de l'input caché
+                                hiddenInput.value = this.form.details_enquete;
+
+                                // Déclencher l'événement pour que Trix se mette à jour
+                                hiddenInput.dispatchEvent(new Event('input', {
+                                    bubbles: true
+                                }));
+
+                                // Alternative: définir directement le contenu de l'éditeur
+                                if (trixEditor.editor) {
+                                    trixEditor.editor.loadHTML(this.form.details_enquete);
+                                }
+                            }
+                        });
+
+
                         for (const field of this.formulaire) {
                             if (field.type === 'geographique' && field.region_id) {
                                 await this.loadDistricts(field.region_id);
@@ -554,8 +611,26 @@
                             }
                         }
                     } catch (error) {
-                        console.error('Erreur chargement offre', error);
+                        console.error('Erreur chargement offre', error.response?.data || error.message);
                         this.notyf.error('Impossible de charger les données de l\'offre');
+                    }
+                },
+                initializeTrixEditor() {
+                    const trixEditor = document.querySelector('trix-editor');
+                    const hiddenInput = document.querySelector('#details_enquete');
+
+                    if (trixEditor && hiddenInput) {
+                        // Écouter les changements dans Trix
+                        trixEditor.addEventListener('trix-change', () => {
+                            this.form.details_enquete = hiddenInput.value;
+                        });
+
+                        // Écouter les changements dans Vue pour mettre à jour Trix
+                        this.$watch('form.details_enquete', (newValue) => {
+                            if (hiddenInput.value !== newValue && trixEditor.editor) {
+                                trixEditor.editor.loadHTML(newValue || '');
+                            }
+                        });
                     }
                 },
                 addField() {
@@ -563,9 +638,17 @@
                         this.notyf.error('Le label est requis');
                         return;
                     }
-                    if (this.newField.type === 'geographique' && !this.isConfigurationValid) {
-                        this.notyf.error('Veuillez compléter la configuration géographique');
-                        return;
+                    if (this.newField.type === 'geographique') {
+                        if (!this.isConfigurationValid) {
+                            this.notyf.error('Veuillez compléter la configuration géographique');
+                            return;
+                        }
+                        if (this.newField.constraint_level === 'commune' && (!this.newField.region_id || !this
+                                .newField.district_id)) {
+                            this.notyf.error(
+                                'Veuillez sélectionner une région et un district pour le niveau commune');
+                            return;
+                        }
                     }
                     this.formulaire.push({
                         ...this.newField
@@ -574,7 +657,7 @@
                         type: 'texte',
                         label: '',
                         obligation: false,
-                        constraint_level: 'all',
+                        constraint_level: null,
                         region_id: null,
                         district_id: null,
                         commune_id: null,
@@ -582,6 +665,9 @@
                         show_district: false,
                         show_commune: false,
                     };
+                    this.selectedRegion = null;
+                    this.selectedDistrict = null;
+                    this.selectedCommune = null;
                     this.districts = [];
                     this.communes = [];
                 },
@@ -589,18 +675,29 @@
                     this.formulaire.splice(index, 1);
                 },
                 async saveOffre() {
+                    if (!this.form.nom_enquete.trim()) {
+                        this.notyf.error("Le nom de l’enquête est requis.");
+                        return;
+                    }
+                    if (!this.form.details_enquete.trim()) {
+                        this.notyf.error("Les détails de l’enquête sont requis.");
+                        return;
+                    }
+                    if (!this.form.date_limite) {
+                        this.notyf.error("La date limite est requise.");
+                        return;
+                    }
                     if (this.formulaire.length === 0) {
                         this.notyf.error("Ajoutez au moins une question.");
                         return;
                     }
                     try {
                         const response = await axios.put(
-                            `{{ route('admin.offers.update', ['offer' => $offer->id]) }}`, {
+                            `{{ url('admin/offers') }}/${this.offerId}`, {
                                 form: this.form,
                                 formulaire: this.formulaire
                             });
                         this.notyf.success('Offre mise à jour avec succès !');
-                        window.location.href = '{{ route('admin.offers') }}';
                     } catch (error) {
                         console.error('Erreur lors de la mise à jour', error.response?.data || error.message);
                         this.notyf.error(

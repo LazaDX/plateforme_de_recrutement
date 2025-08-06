@@ -54,8 +54,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::delete('/offers/{offre}', [OffreController::class, 'destroy'])->name('offers.destroy');
     Route::get('/getAllOffers', [OffreController::class,'getAllOffers'])->name('getAllOffers');
     Route::post('/creat-offers', [OffreController::class, 'store'])->name('offers.store');
-    Route::get('/offers/{offre}', [OffreController::class, 'show'])->name('offers.show');
-
+    Route::get('/offers/{offre}', [OffreController::class, 'getOffer'])->name('offers.show');
 
     Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
 });

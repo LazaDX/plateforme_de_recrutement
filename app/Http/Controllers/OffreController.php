@@ -8,8 +8,8 @@ use App\Models\Offre;
 use App\Models\PostuleOffre;
 use App\Models\QuestionFormulaire;
 use App\Models\Region;
-
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class OffreController extends Controller
 {
@@ -19,7 +19,7 @@ class OffreController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    
+
     {
         // $offres = Offre::with('questionFormulaire', 'postuleOffre')->get();
         // return response()->json($offres);
@@ -160,7 +160,7 @@ class OffreController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Offre $offre)
+    public function update(Request $request, $id)
     {
         //  $data = $request->validate([
         //     'nom_enquete'  => 'sometimes|required|string|max:255',
@@ -173,25 +173,115 @@ class OffreController extends Controller
 
         // $offre->update($data);
         // return response()->json($offre);
+
+        try {
+            $offre = Offre::find($id);
+        if (!$offre) {
+                    \Log::error('Offre non trouvée ou ID non valide', ['offre_id' => $id ?? 'null']);
+                    return response()->json([
+                        'error' => 'Offre non trouvée ou ID non valide'
+                    ], 404);
+        }
+
         $form = $request->input("form");
         $formulaire = $request->input("formulaire");
 
-        $validated = $request->validate([
-            'form.nom_enquete' => 'required|string|max:255',
-            'form.details_enquete' => 'required|string',
-            'form.date_debut' => 'nullable|date',
-            'form.date_limite' => 'required|date',
-            'form.priorite' => 'required|string',
-            'form.status_offre' => 'required|in:brouillon,publiee,fermee',
-            'formulaire' => 'required|array|min:1',
+        // $validated = $request->validate([
+        //     'form.nom_enquete' => 'nullable|string|max:255',
+        //     'form.details_enquete' => 'nullable|string',
+        //     'form.date_debut' => 'nullable|date',
+        //     'form.date_limite' => 'required|date',
+        //     'form.priorite' => 'required|string',
+        //     'form.status_offre' => 'required|in:brouillon,publiee,fermee',
+        //     'formulaire' => 'required|array|min:1',
+        // ]);
+
+        $offreId = $id;
+
+        // Mettre à jour l'offre SANS affecter l'ID
+        $offre->update([
+            'nom_enquete' => $form['nom_enquete'],
+            'details_enquete' => $form['details_enquete'],
+            'date_debut' => $form['date_debut'],
+            'date_limite' => $form['date_limite'],
+            'status_offre' => $form['status_offre'],
+            'priorite' => $form['priorite']
         ]);
 
-        $offer->update($request->form);
-        // Gérer la mise à jour du formulaire dynamique (par exemple, supprimer les anciens champs et créer les nouveaux)
-        $offer->formulaire()->delete();
-        $offer->formulaire()->createMany($request->formulaire);
+        // Supprimer les anciennes questions en utilisant l'ID stocké
+        QuestionFormulaire::where('offre_id', $offreId)->delete();
 
-        return response()->json(['message' => 'Offre mise à jour avec succès']);
+        // Recréer les questions avec l'ID stocké
+        foreach ($formulaire as $question) {
+            $all_regions = false;
+            $all_districts = false;
+            $all_communes = false;
+
+            if ($question['type'] === 'geographique') {
+                switch ($question['constraint_level'] ?? null) {
+                    case 'all':
+                        $all_regions = true;
+                        $all_districts = true;
+                        $all_communes = true;
+                        break;
+                    case 'region_district':
+                        $all_regions = true;
+                        $all_districts = true;
+                        $all_communes = false;
+                        break;
+                    case 'region':
+                        $all_regions = true;
+                        $all_districts = false;
+                        $all_communes = false;
+                        break;
+                    case 'district':
+                        $all_regions = false;
+                        $all_districts = true;
+                        $all_communes = false;
+                        break;
+                    case 'commune':
+                        $all_regions = false;
+                        $all_districts = false;
+                        $all_communes = true;
+                        break;
+                    case 'district_commune':
+                        $all_regions = false;
+                        $all_districts = true;
+                        $all_communes = true;
+                        break;
+                }
+            }
+
+            QuestionFormulaire::create([
+                'offre_id' => $offreId,
+                'label' => $question['label'],
+                'type' => $question['type'],
+                'obligation' => $question['obligation'] ?? false,
+                'all_regions' => $all_regions,
+                'all_districts' => $all_districts,
+                'all_communes' => $all_communes,
+                'region_id' => ($question['type'] === 'geographique' && isset($question['region_id'])) ? $question['region_id'] : null,
+                'district_id' => ($question['type'] === 'geographique' && isset($question['district_id'])) ? $question['district_id'] : null,
+                'commune_id' => ($question['type'] === 'geographique' && isset($question['commune_id'])) ? $question['commune_id'] : null,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Offre mise à jour avec succès',
+            'offre' => $offre->fresh() // Recharger l'offre depuis la base
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'error' => 'Validation échouée',
+            'messages' => $e->errors()
+        ], 422);
+    } catch (\Throwable $th) {
+        \Log::error('Erreur lors de la mise à jour de l\'offre: ' . $th->getMessage());
+        return response()->json([
+            'error' => 'Erreur serveur: ' . $th->getMessage()
+        ], 500);
+    }
     }
 
     /**
@@ -211,7 +301,61 @@ class OffreController extends Controller
         return response()->json(['success' => true]);
     }
 
-    /* Administrateur fonction pour l'offre */
+    /* ADMIN */
+    public function getOffer(Offre $offre)
+    {
+        try {
+            $offre = Offre::with([
+                'questionFormulaire.region',
+                'questionFormulaire.district',
+                'questionFormulaire.commune'
+            ])->findOrFail($offre->id);
+
+            $response = [
+                'nom_enquete' => $offre->nom_enquete,
+                'details_enquete' => $offre->details_enquete,
+                'created_at' => Carbon::parse($offre->created_at)->format('Y-m-d'),
+                'date_limite' => Carbon::parse($offre->date_limite)->format('Y-m-d'),
+                'priorite' => $offre->priorite ?? 'moyenne',
+                'status_offre' => $offre->status_offre ?? 'brouillon',
+                'formulaire' => $offre->questionFormulaire ? $offre->questionFormulaire->map(function ($question) {
+                    $constraint_level = null;
+                    if ($question->all_regions && $question->all_districts && $question->all_communes) {
+                        $constraint_level = 'all';
+                    } elseif ($question->all_regions && $question->all_districts && !$question->all_communes) {
+                        $constraint_level = 'region_district';
+                    } elseif ($question->all_regions && !$question->all_districts && !$question->all_communes) {
+                        $constraint_level = 'region';
+                    } elseif (!$question->all_regions && $question->all_districts && !$question->all_communes) {
+                        $constraint_level = 'district';
+                    } elseif (!$question->all_regions && !$question->all_districts && $question->all_communes) {
+                        $constraint_level = 'commune';
+                    } elseif (!$question->all_regions && $question->all_districts && $question->all_communes) {
+                        $constraint_level = 'district_commune';
+                    }
+
+                    return [
+                        'type' => $question->type,
+                        'label' => $question->label,
+                        'obligation' => $question->obligation,
+                        'constraint_level' => $constraint_level,
+                        'region_id' => $question->region_id,
+                        'district_id' => $question->district_id,
+                        'commune_id' => $question->commune_id,
+                        'show_region' => in_array($constraint_level, ['all', 'region_district', 'district', 'commune', 'district_commune']),
+                        'show_district' => in_array($constraint_level, ['all', 'region_district', 'district', 'commune', 'district_commune']),
+                        'show_commune' => in_array($constraint_level, ['all', 'commune', 'district_commune']),
+                    ];
+                })->toArray() : [],
+            ];
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans getOffer: ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur serveur interne'], 500);
+        }
+    }
+
     public function edit(Offre $offer)
     {
         return view('backOffice.pages.offer-edit', compact('offer'));

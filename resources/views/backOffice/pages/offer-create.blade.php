@@ -37,12 +37,12 @@
 
             <!-- Statut -->
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Statut de l'offre</label>
-                <select v-model="form.status_offre" name="status_offre"
+                <label class="block text-sm font-medium text-gray-700 mb-1">Priorité</label>
+                <select v-model="form.priorite" name="priorite"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300">
-                    <option value="brouillon">Brouillon</option>
-                    <option value="publiee">Publiée</option>
-                    <option value="fermee">Fermée</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="moyenne">moyenne</option>
+                    <option value="basse">Basse</option>
                 </select>
             </div>
 
@@ -407,7 +407,7 @@
                         date_debut: '',
                         date_limite: '',
                         priorite: 'moyenne',
-                        status_offre: 'brouillon',
+                        status_offre: 'publiee',
                     },
                     formulaire: [],
                     newField: {

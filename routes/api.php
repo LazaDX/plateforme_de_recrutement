@@ -15,7 +15,9 @@ use App\Http\Controllers\ReponseFormulaireController;
 // Route::middleware('auth:sanctum')->group(function () {
 
 // });
+Route::put('/offers/{offer}', [OffreController::class, 'update'])->name('offers.update');
 
+Route::get('/offers/{offre}', [OffreController::class, 'getOffer'])->name('offers.show');
 Route::apiResource('offres', OffreController::class);
 Route::delete('/offers/{offre}', [OffreController::class, 'destroy'])->name('offers.destroy');
 
