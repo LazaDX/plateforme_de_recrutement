@@ -17,6 +17,9 @@ use App\Http\Controllers\ReponseFormulaireController;
 // });
 
 Route::apiResource('offres', OffreController::class);
+Route::delete('/offers/{offre}', [OffreController::class, 'destroy'])->name('offers.destroy');
+
+Route::get('/getAllOffers', [OffreController::class,'getAllOffers'])->name('getAllOffers');
 
 // Route::post("/create_offre", [OffreController::class, 'store']);
 Route::group(['prefix' => 'offre'], function($group) {

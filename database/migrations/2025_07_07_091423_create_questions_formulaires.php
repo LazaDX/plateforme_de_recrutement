@@ -19,6 +19,12 @@ class CreateQuestionsFormulaires extends Migration
             $table->string('label'); // label du question
             $table->string('type'); // type du question (ex: text, radio, checkbox, selectbox)
             $table->boolean('obligation')->default(false);
+            $table->boolean('all_regions')->default(false);
+            $table->boolean('all_districts')->default(false);
+            $table->boolean('all_communes')->default(false);
+            $table->foreignId('region_id')->nullable()->constrained('regions')->nullOnDelete();
+            $table->foreignId('district_id')->nullable()->constrained('districts')->nullOnDelete();
+            $table->foreignId('commune_id')->nullable()->constrained('communes')->nullOnDelete();
             $table->timestamps();
         });
     }

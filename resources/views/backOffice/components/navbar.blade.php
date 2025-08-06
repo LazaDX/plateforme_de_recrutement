@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-40 bg-white border-b border-navy-200 shadow-sm px-6 py-4 backdrop-blur bg-opacity-95">
+<header class="sticky top-0 z-40 bg-white shadow-sm px-6 py-4 backdrop-blur bg-opacity-95">
     <div class="flex items-center justify-between">
         <!-- Left: Menu (mobile) -->
         <div class="flex items-center">

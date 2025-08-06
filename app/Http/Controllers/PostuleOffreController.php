@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Offre;
 use App\Models\PostuleOffre;
 use App\Models\ReponseFormulaire;
+use App\Models\QuestionFormulaire;
+use Illuminate\Support\Facades\Log;
 
 class PostuleOffreController extends Controller
 {
@@ -38,32 +40,77 @@ class PostuleOffreController extends Controller
         // $postule = $offre->postuleOffre()->create($data);
         // return response()->json($postule, 201);
 
-        if (!auth()->check()) {
+       if (!auth()->check()) {
             return redirect()->route('login')->with('error', 'Vous devez être connecté pour postuler.');
         }
 
-        $request->validate([
-        'reponses' => 'required|array',
-        ]);
+        try {
+            $validated = $request->validate([
+                'offre_id' => 'required|exists:offres,id',
+                'reponses' => 'required|array',
+                'reponses.*.valeur' => 'nullable|string',
+                'reponses.*.region_id' => 'nullable|exists:regions,id',
+                'reponses.*.district_id' => 'nullable|exists:districts,id',
+                'reponses.*.commune_id' => 'nullable|exists:communes,id',
+            ]);
+            if ($offre->id != $request->offre_id) {
+                return redirect()->route('enqueteur.offre.show', $offre->id)
+                    ->with('error', 'Offre non valide.');
+            }
+            $postule = PostuleOffre::create([
+                'offre_id' => $offre->id,
+                'enqueteur_id' => auth()->id(),
+                'date_postule' => now(),
+                'type_enqueteur' => $request->input('type_enqueteur', 'standard'),
+                'status_postule' => 'en_attente',
+            ]);
+            foreach ($request->reponses as $questionId => $reponse) {
+                $question = QuestionFormulaire::findOrFail($questionId);
 
-        $postule = PostuleOffre::create([
-        'offre_id' => $offre->id,
-        'enqueteur_id' => auth()->id(),
-        'date_postule' => now(),
-        'type_enqueteur' => $request->input('type_enqueteur', 'standard'),
-        'status_postule' => 'en attente',
-        ]);
+                $data = [
+                    'postule_offre_id' => $postule->id,
+                    'question_id' => $questionId,
+                    'valeur' => $reponse['valeur'] ?? '',
+                ];
 
-        foreach ($request->reponses as $questionId => $valeur) {
-        ReponseFormulaire::create([
-            'postule_offre_id' => $postule->id,
-            'question_id' => $questionId,
-            'valeur' => $valeur,
-        ]);
+                if ($question->type === 'geographique') {
+                    $data['region_id'] = $reponse['region_id'] ?? null;
+                    $data['district_id'] = $reponse['district_id'] ?? null;
+                    $data['commune_id'] = $reponse['commune_id'] ?? null;
+
+                    if ($question->obligation) {
+                        if ($question->all_regions && !$question->region_id && !$data['region_id']) {
+                            return redirect()->route('enqueteur.offre.show', $offre->id)
+                                ->with('error', 'La région est requise pour la question "' . $question->label . '".');
+                        }
+                        if ($question->all_districts && !$question->district_id && !$data['district_id']) {
+                            return redirect()->route('enqueteur.offre.show', $offre->id)
+                                ->with('error', 'Le district est requis pour la question "' . $question->label . '".');
+                        }
+                        if ($question->all_communes && !$question->commune_id && !$data['commune_id']) {
+                            return redirect()->route('enqueteur.offre.show', $offre->id)
+                                ->with('error', 'La commune est requise pour la question "' . $question->label . '".');
+                        }
+                    }
+                }
+
+                ReponseFormulaire::create($data);
+            }
+
+           return response()->json([
+            'message' => 'Candidature envoyée avec succès !',
+        ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+             return response()->json([
+                'error' => 'Validation échouée',
+                'messages' => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            Log::error('Erreur lors de la création de l\'offre: ' . $th->getMessage());
+            return response()->json([
+                'error' => 'Erreur serveur: ' . $th->getMessage()
+            ], 500);
         }
-
-       return redirect()->route('enqueteur.offre.show', $offre->id)
-            ->with('success', 'Votre candidature a été envoyée avec succès !');
     }
 
     /**
@@ -73,17 +120,8 @@ class PostuleOffreController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    // public function show(PostuleOffre $postuleOffre)
-    // {
-    //     //$postuleOffre->load('reponseFormulaire');
-    //     // return response()->json($postuleOffre);
-
-    //     dd($postuleOffre);
-    // }
-
     public function show(PostuleOffre $postule)
     {
-        // Load the postule with its related reponses
         return response()->json($postule->load('reponseFormulaire'));
     }
 
@@ -119,4 +157,8 @@ class PostuleOffreController extends Controller
         $postule->delete();
         return response()->json(['message' => 'Candidature supprimée']);
     }
+
+
+
+
 }

@@ -1,6 +1,6 @@
 @extends('backOffice.layouts.admin')
 
-@section('title', 'Tableau de bord')
+@section('title', 'Analytiques')
 
 @section('content')
     <div class="bg-white rounded shadow p-6">

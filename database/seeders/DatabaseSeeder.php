@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
             DirectionSeeder::class,
             AdministrateurSeeder::class,
             EnqueteurSeeder::class,
-            RegionSeeder::class,
         ]);
     }
 }
