@@ -149,7 +149,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
-                                        <a :href="'/admin/offers/' + offer.id"
+                                        <a :href="'/admin/offersView/' + offer.id"
                                             class="text-blue-600 hover:text-blue-900 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                                 fill="currentColor">

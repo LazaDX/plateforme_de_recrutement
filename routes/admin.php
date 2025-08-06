@@ -47,9 +47,10 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/regions/{region}/districts', [GeoController::class, 'districts'])->name('districts');
     Route::get('/districts/{district}/communes', [GeoController::class, 'communes'])->name('communes');
 
-
     // Offers
+    Route::get('/offers/{offre}/candidatures', [OffreController::class, 'showCandidatures'])->name('offers.candidatures');
     Route::get('/offers/{offer}/edit', [OffreController::class, 'edit'])->name('offers.edit');
+    Route::get('/offersView/{offre}', [OffreController::class, 'viewOffer'])->name('offers.viewOffer');
     Route::put('/offers/{offer}', [OffreController::class, 'update'])->name('offers.update');
     Route::delete('/offers/{offre}', [OffreController::class, 'destroy'])->name('offers.destroy');
     Route::get('/getAllOffers', [OffreController::class,'getAllOffers'])->name('getAllOffers');

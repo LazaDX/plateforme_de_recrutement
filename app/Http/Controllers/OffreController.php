@@ -356,6 +356,17 @@ class OffreController extends Controller
         }
     }
 
+    public function showCandidatures(Offre $offre)
+    {
+        $offre->load(['postuleOffre.enqueteur', 'postuleOffre.reponseFormulaire']);
+        return view('admin.offers.candidatures', compact('offre'));
+    }
+
+    public function viewOffer(Offre $offre)
+    {
+        return view('backOffice.pages.offer-view', compact('offre'));
+    }
+
     public function edit(Offre $offer)
     {
         return view('backOffice.pages.offer-edit', compact('offer'));
