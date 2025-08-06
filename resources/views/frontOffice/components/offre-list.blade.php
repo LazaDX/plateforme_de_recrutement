@@ -14,7 +14,7 @@
             class="text-lg font-bold text-blue-900">{{ $offre->nom_enquete }}</a>
         <div class="flex items-center text-sm text-gray-500 mt-2 gap-4">
         </div>
-        <p class="text-sm text-gray-600 mt-1">{{ \Illuminate\Support\Str::limit($offre->details_enquete, 200) }}</p>
+        {{-- <p class="text-sm text-gray-600 mt-1">{{ \Illuminate\Support\Str::limit($offre->details_enquete, 200) }}</p> --}}
         <div class="flex items-center text-xs text-gray-500 mt-4 gap-4">
             <span> Publié le
                 {{ \Carbon\Carbon::parse($offre->created_at)->isoFormat('D MMMM YYYY') }}</span>

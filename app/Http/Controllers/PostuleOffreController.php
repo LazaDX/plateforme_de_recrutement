@@ -45,7 +45,6 @@ class PostuleOffreController extends Controller
         }
 
         try {
-            // Valider les données
             $validated = $request->validate([
                 'offre_id' => 'required|exists:offres,id',
                 'reponses' => 'required|array',
@@ -54,14 +53,10 @@ class PostuleOffreController extends Controller
                 'reponses.*.district_id' => 'nullable|exists:districts,id',
                 'reponses.*.commune_id' => 'nullable|exists:communes,id',
             ]);
-
-            // Vérifier que l'offre_id correspond à l'offre
             if ($offre->id != $request->offre_id) {
                 return redirect()->route('enqueteur.offre.show', $offre->id)
                     ->with('error', 'Offre non valide.');
             }
-
-            // Créer une entrée dans postules_offres
             $postule = PostuleOffre::create([
                 'offre_id' => $offre->id,
                 'enqueteur_id' => auth()->id(),
@@ -69,8 +64,6 @@ class PostuleOffreController extends Controller
                 'type_enqueteur' => $request->input('type_enqueteur', 'standard'),
                 'status_postule' => 'en_attente',
             ]);
-
-            // Enregistrer les réponses
             foreach ($request->reponses as $questionId => $reponse) {
                 $question = QuestionFormulaire::findOrFail($questionId);
 
@@ -85,7 +78,6 @@ class PostuleOffreController extends Controller
                     $data['district_id'] = $reponse['district_id'] ?? null;
                     $data['commune_id'] = $reponse['commune_id'] ?? null;
 
-                    // Validation supplémentaire pour les champs géographiques obligatoires
                     if ($question->obligation) {
                         if ($question->all_regions && !$question->region_id && !$data['region_id']) {
                             return redirect()->route('enqueteur.offre.show', $offre->id)
@@ -128,17 +120,8 @@ class PostuleOffreController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    // public function show(PostuleOffre $postuleOffre)
-    // {
-    //     //$postuleOffre->load('reponseFormulaire');
-    //     // return response()->json($postuleOffre);
-
-    //     dd($postuleOffre);
-    // }
-
     public function show(PostuleOffre $postule)
     {
-        // Load the postule with its related reponses
         return response()->json($postule->load('reponseFormulaire'));
     }
 
@@ -174,4 +157,8 @@ class PostuleOffreController extends Controller
         $postule->delete();
         return response()->json(['message' => 'Candidature supprimée']);
     }
+
+
+
+
 }

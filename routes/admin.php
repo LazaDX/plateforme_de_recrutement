@@ -47,7 +47,15 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/regions/{region}/districts', [GeoController::class, 'districts'])->name('districts');
     Route::get('/districts/{district}/communes', [GeoController::class, 'communes'])->name('communes');
 
+
+    // Offers
+    Route::get('/offers/{offer}/edit', [OffreController::class, 'edit'])->name('offers.edit');
+    Route::put('/offers/{offer}', [OffreController::class, 'update'])->name('offers.update');
+    Route::delete('/offers/{offre}', [OffreController::class, 'destroy'])->name('offers.destroy');
+    Route::get('/getAllOffers', [OffreController::class,'getAllOffers'])->name('getAllOffers');
     Route::post('/creat-offers', [OffreController::class, 'store'])->name('offers.store');
+    Route::get('/offers/{offre}', [OffreController::class, 'show'])->name('offers.show');
+
 
     Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
 });
