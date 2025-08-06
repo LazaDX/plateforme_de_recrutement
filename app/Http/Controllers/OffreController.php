@@ -18,6 +18,7 @@ class OffreController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
+    
     {
         // $offres = Offre::with('questionFormulaire', 'postuleOffre')->get();
         // return response()->json($offres);
