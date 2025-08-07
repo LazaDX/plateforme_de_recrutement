@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\OffreController;
 use App\Http\Controllers\GeoController;
-
+use App\Http\Controllers\EnqueteurController;
+use App\Http\Controllers\AnalyticsController;
 
 Route::middleware('guest:admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
@@ -35,6 +36,10 @@ Route::middleware('auth:admin')->group(function () {
         return view('backOffice.pages.offer');
     })->name('offers');
 
+    Route::get('/administrateurs', function() {
+        return view('backOffice.pages.administrateurs');
+    })->name('administrateurs');
+
     Route::get('/offers/create', function() {
         return view('backOffice.pages.offer-create');
     })->name('offers.create');
@@ -56,8 +61,14 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/getAllOffers', [OffreController::class,'getAllOffers'])->name('getAllOffers');
     Route::post('/creat-offers', [OffreController::class, 'store'])->name('offers.store');
     Route::get('/offers/{offre}', [OffreController::class, 'getOffer'])->name('offers.show');
-
     Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
+
+
+    // Enqueteurs
+    Route::get('/enqueteurs/view', [EnqueteurController::class, 'index'])->name('enqueteurs.index');
+
+    // Analytiques
+    Route::get('/analytics/{timeRange}', [AnalyticsController::class, 'getAnalytics']);
 });
 
 

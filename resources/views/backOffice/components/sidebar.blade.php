@@ -48,6 +48,12 @@
                 <i class="fas fa-history mr-3 h-5 w-5"></i>
                 Historique d'activité
             </a>
+
+            <a href="{{ route('admin.administrateurs') }}"
+                class="flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors duration-200 {{ request()->routeIs('admin.administrateurs') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                <i class="fas fa-user mr-3 h-5 w-5"></i>
+                Administrateurs
+            </a>
         </nav>
     </div>
 
