@@ -3,5 +3,5 @@ import ProfileDropdown from './components/ProfileDropdown.vue';
 
 
 const navbarApp = createApp({});
-navbarApp.component('ProfileDropdown', ProfileDropdown);
+navbarApp.component('profile-dropdown', ProfileDropdown);
 navbarApp.mount('#navbarApp');

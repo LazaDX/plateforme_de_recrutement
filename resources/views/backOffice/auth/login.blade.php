@@ -17,7 +17,7 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .login-card {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
             border-radius: 12px;
@@ -25,11 +25,11 @@
             width: 100%;
             max-width: 420px;
         }
-        
+
         .input-field {
             transition: all 0.3s ease;
         }
-        
+
         .input-field:focus {
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
         }
@@ -41,7 +41,6 @@
         <div class="bg-blue-600 py-6 px-8 text-center">
             <h1 class="text-2xl font-bold text-white">INSTAT ADMIN</h1>
         </div>
-        
         <div class="p-8">
             @if (session('status'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
@@ -66,7 +65,6 @@
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
                     <div class="relative">
@@ -76,7 +74,8 @@
                         <input id="password" name="password" type="password" required
                             class="input-field pl-10 pr-10 w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-blue-500"
                             placeholder="••••••••">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePassword()">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                            onclick="togglePassword()">
                             <i id="eye-icon" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
                         </div>
                     </div>
@@ -87,19 +86,21 @@
 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <input id="remember" name="remember" type="checkbox"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                         <label for="remember" class="ml-2 block text-sm text-gray-700">Se souvenir de moi</label>
                     </div>
-                    
+
                     <a href="#" class="text-sm text-blue-600 hover:text-blue-500">Mot de passe oublié?</a>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center">
                     <i class="fas fa-sign-in-alt mr-2"></i> Se connecter
                 </button>
             </form>
         </div>
-        
+
         <div class="bg-gray-50 px-8 py-4 text-center border-t border-gray-200">
             <p class="text-sm text-gray-600">© 2025 INSTAT. Tous droits réservés.</p>
         </div>
@@ -109,7 +110,7 @@
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eye-icon');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 eyeIcon.classList.remove('fa-eye');

@@ -33,7 +33,6 @@
 
     {{-- Scripts --}}
     <script src="{{ mix('js/navbarApp.js') }}"></script>
-    {{-- <script src="{{ mix('js/modalFormOfferApp.js') }}"></script> --}}
 
 </body>
 

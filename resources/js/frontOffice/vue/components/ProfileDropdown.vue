@@ -52,7 +52,7 @@ export default {
     hideMenu() {
       this.hideTimeout = setTimeout(() => {
         this.isOpen = false;
-      }, 200); // Délai de 200ms avant fermeture
+      }, 200);
     },
     cancelHide() {
       clearTimeout(this.hideTimeout);

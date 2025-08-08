@@ -1,6 +1,7 @@
 {
     "/js/app.js": "/js/app.js",
     "/js/navbarApp.js": "/js/navbarApp.js",
-    "/js/modalFormOfferApp.js": "/js/modalFormOfferApp.js",
+    "/js/adminProfilDropupApp.js": "/js/adminProfilDropupApp.js",
+    "/js/sidebarApp.js": "/js/sidebarApp.js",
     "/css/app.css": "/css/app.css"
 }
