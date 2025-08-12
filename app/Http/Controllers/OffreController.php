@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 
 use App\Models\Offre;
 use App\Models\PostuleOffre;
+use App\Models\ReponseFormulaire;
 use App\Models\QuestionFormulaire;
 use App\Models\Region;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class OffreController extends Controller
@@ -102,7 +104,7 @@ class OffreController extends Controller
                     }
                 }
 
-                QuestionFormulaire::create([
+                $questionData = [
                     'offre_id' => $offre->id,
                     'label' => $question['label'],
                     'type' => $question['type'],
@@ -113,12 +115,30 @@ class OffreController extends Controller
                     'region_id' => $question['type'] === 'geographique' ? ($question['region_id'] ?? null) : null,
                     'district_id' => $question['type'] === 'geographique' ? ($question['district_id'] ?? null) : null,
                     'commune_id' => $question['type'] === 'geographique' ? ($question['commune_id'] ?? null) : null,
-                ]);
+                ];
+
+                if (in_array($question['type'], ['liste', 'choix_multiple']) && isset($question['options'])) {
+                    $questionData['options'] = implode('|', $question['options']);
+                }
+
+                QuestionFormulaire::create($questionData);
+                // QuestionFormulaire::create([
+                //     'offre_id' => $offre->id,
+                //     'label' => $question['label'],
+                //     'type' => $question['type'],
+                //     'obligation' => $question['obligation'],
+                //     'all_regions' => $all_regions,
+                //     'all_districts' => $all_districts,
+                //     'all_communes' => $all_communes,
+                //     'region_id' => $question['type'] === 'geographique' ? ($question['region_id'] ?? null) : null,
+                //     'district_id' => $question['type'] === 'geographique' ? ($question['district_id'] ?? null) : null,
+                //     'commune_id' => $question['type'] === 'geographique' ? ($question['commune_id'] ?? null) : null,
+                // ]);
             }
 
             return response()->json([
                 'message' => 'Offre créée avec succès !',
-                'offre' => $offre
+                'offre_id' => $offre->id
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -383,4 +403,57 @@ class OffreController extends Controller
             return response()->json(['error' => 'Unable to fetch offers'], 500);
         }
     }
+
+    public function showCandidateResponses($candidatureId)
+    {
+        try {
+            $candidature = PostuleOffre::with([
+                'enqueteur',
+                'reponseFormulaire.questionFormulaire',
+                'reponseFormulaire.region',
+                'reponseFormulaire.district',
+                'reponseFormulaire.commune'
+            ])->findOrFail($candidatureId);
+
+            return response()->json([
+                'candidature' => $candidature,
+                'responses' => $candidature->reponseFormulaire
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Candidature non trouvée'], 404);
+        }
+    }
+
+// À ajouter dans AdminOffreController.php
+
+public function updateCandidatureStatus(Request $request, $candidatureId)
+{
+    $request->validate([
+        'status_postule' => 'required|in:en_attente,accepte,rejete'
+    ]);
+
+    try {
+        $candidature = PostuleOffre::findOrFail($candidatureId);
+        $candidature->update([
+            'status_postule' => $request->status_postule
+        ]);
+
+        $statusMessages = [
+            'accepte' => 'Candidature acceptée avec succès !',
+            'rejete' => 'Candidature rejetée.',
+            'en_attente' => 'Candidature remise en attente.'
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => $statusMessages[$request->status_postule]
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur lors de la mise à jour du statut'
+        ], 500);
+    }
+}
 }

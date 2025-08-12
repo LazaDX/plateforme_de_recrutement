@@ -19,7 +19,7 @@ class ReponseFormulaire extends Model
     protected $fillable = [
         'id','postule_offre_id', 'question_id','region_id',
         'district_id',
-        'commune_id', 'valeur'
+        'commune_id', 'valeur', 'fichier_path'
     ];
 
     public function postuleOffre()

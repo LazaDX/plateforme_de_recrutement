@@ -16,7 +16,8 @@ class QuestionFormulaire extends Model
     use HasFactory;
     protected $table = 'questions_formulaires';
     protected $fillable = [
-        'id','offre_id', 'label', 'type', 'obligation',  'all_regions',
+        'id','offre_id', 'label', 'type', 'obligation',  'options',
+        'all_regions',
         'region_id',
         'all_districts',
         'district_id',
@@ -30,6 +31,12 @@ class QuestionFormulaire extends Model
         'all_districts' => 'boolean',
         'all_communes'  => 'boolean',
     ];
+
+
+    public function getOptionsArrayAttribute()
+    {
+        return $this->options ? explode('|', $this->options) : [];
+    }
 
     public function offre()
     {

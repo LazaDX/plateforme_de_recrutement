@@ -106,7 +106,7 @@
             <div v-show="showModal"
                 class="fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out"
                 :class="{ 'opacity-0 pointer-events-none': !showModal, 'opacity-100': showModal }">
-                <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 ease-in-out"
+                <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 ease-in-out"
                     :class="{ 'translate-y-10 opacity-0': !showModal, 'translate-y-0 opacity-100': showModal }">
                     <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center bg-gray-50">
                         <h2 class="text-xl font-bold text-gray-800 flex items-center">
@@ -118,15 +118,17 @@
                         </button>
                     </div>
                     <div class="p-6 bg-gray-50">
-                        <form @submit.prevent="submitForm" ref="applicationForm ">
+                        <form @submit.prevent="submitForm" ref="applicationForm" enctype="multipart/form-data">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="offre_id" :value="offreId">
+
                             <div v-for="question in questions" :key="question.id" class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     @{{ question.label }}
                                     <span v-if="question.obligation" class="text-red-500">*</span>
                                 </label>
 
+                                <!-- Champ texte -->
                                 <div v-if="question.type === 'texte'" class="relative">
                                     <div
                                         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -137,6 +139,8 @@
                                         class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         :required="question.obligation">
                                 </div>
+
+                                <!-- Zone de texte -->
                                 <div v-else-if="question.type === 'long_texte'" class="relative">
                                     <div
                                         class="absolute inset-y-0 left-0 pl-3 pt-2 flex items-start pointer-events-none text-gray-400">
@@ -146,6 +150,8 @@
                                         class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         rows="4" :required="question.obligation"></textarea>
                                 </div>
+
+                                <!-- Nombre -->
                                 <div v-else-if="question.type === 'nombre'" class="relative">
                                     <div
                                         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -156,6 +162,8 @@
                                         class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         :required="question.obligation">
                                 </div>
+
+                                <!-- Email -->
                                 <div v-else-if="question.type === 'email'" class="relative">
                                     <div
                                         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -166,6 +174,104 @@
                                         class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         :required="question.obligation">
                                 </div>
+
+                                <!-- Liste déroulante -->
+                                <div v-else-if="question.type === 'liste'" class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                        <i class="fas fa-list"></i>
+                                    </div>
+                                    <select v-model="responses[question.id].valeur"
+                                        :name="'reponses[' + question.id + '][valeur]'"
+                                        class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
+                                        :required="question.obligation">
+                                        <option value="">Sélectionnez une option...</option>
+                                        <option v-for="option in question.options_array" :key="option"
+                                            :value="option">
+                                            @{{ option }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Choix multiple -->
+                                <div v-else-if="question.type === 'choix_multiple'" class="space-y-2">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <label v-for="option in question.options_array" :key="option"
+                                            class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                            <input type="checkbox" :value="option"
+                                                v-model="responses[question.id].selected_options"
+                                                class="mr-3 text-blue-600 focus:ring-blue-500">
+                                            <span class="text-sm text-gray-700">@{{ option }}</span>
+                                        </label>
+                                    </div>
+                                    <input type="hidden" :name="'reponses[' + question.id + '][valeur]'"
+                                        :value="responses[question.id].selected_options.join(', ')">
+                                </div>
+
+                                <!-- Image -->
+                                <div v-else-if="question.type === 'image'" class="space-y-3">
+                                    <div
+                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                                        <div v-if="!responses[question.id].preview">
+                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                            <p class="text-gray-600 mb-2">Cliquez pour sélectionner une image</p>
+                                            <p class="text-sm text-gray-500">JPEG, PNG, JPG (max 5MB)</p>
+                                        </div>
+                                        <div v-else class="space-y-3">
+                                            <img :src="responses[question.id].preview" alt="Aperçu"
+                                                class="max-w-48 max-h-48 mx-auto rounded-lg shadow-md">
+                                            <p class="text-sm text-green-600">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Image sélectionnée
+                                            </p>
+                                            <button type="button" @click="removeFile(question.id)"
+                                                class="text-red-600 hover:text-red-800 text-sm">
+                                                <i class="fas fa-trash mr-1"></i>Supprimer
+                                            </button>
+                                        </div>
+                                        <input type="file" :ref="'file_' + question.id"
+                                            @change="handleFileUpload(question.id, $event)"
+                                            accept="image/jpeg,image/png,image/jpg" class="hidden"
+                                            :required="question.obligation && !responses[question.id].file">
+                                    </div>
+                                    <button type="button" @click="$refs['file_' + question.id][0].click()"
+                                        class="w-full py-2 px-4 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                                        <i class="fas fa-image mr-2"></i>Choisir une image
+                                    </button>
+                                </div>
+
+                                <!-- Fichier PDF -->
+                                <div v-else-if="question.type === 'fichier'" class="space-y-3">
+                                    <div
+                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
+                                        <div v-if="!responses[question.id].fileName">
+                                            <i class="fas fa-file-pdf text-4xl text-gray-400 mb-4"></i>
+                                            <p class="text-gray-600 mb-2">Cliquez pour sélectionner un fichier PDF</p>
+                                            <p class="text-sm text-gray-500">PDF uniquement (max 10MB)</p>
+                                        </div>
+                                        <div v-else class="space-y-3">
+                                            <i class="fas fa-file-pdf text-4xl text-red-600"></i>
+                                            <p class="text-sm text-green-600">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                @{{ responses[question.id].fileName }}
+                                            </p>
+                                            <button type="button" @click="removeFile(question.id)"
+                                                class="text-red-600 hover:text-red-800 text-sm">
+                                                <i class="fas fa-trash mr-1"></i>Supprimer
+                                            </button>
+                                        </div>
+                                        <input type="file" :ref="'file_' + question.id"
+                                            @change="handleFileUpload(question.id, $event)" accept="application/pdf"
+                                            class="hidden"
+                                            :required="question.obligation && !responses[question.id].file">
+                                    </div>
+                                    <button type="button" @click="$refs['file_' + question.id][0].click()"
+                                        class="w-full py-2 px-4 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                                        <i class="fas fa-file-pdf mr-2"></i>Choisir un fichier PDF
+                                    </button>
+                                </div>
+
+                                <!-- Géographique (code existant) -->
                                 <div v-else-if="question.type === 'geographique'"
                                     class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <!-- Région -->
@@ -238,6 +344,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="border-t border-gray-200 pt-4 mt-6 flex justify-end space-x-3">
                                 <button type="button" @click="showModal = false"
                                     class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
@@ -256,6 +363,7 @@
                 </div>
             </div>
         </main>
+
         <script>
             const {
                 createApp,
@@ -283,12 +391,62 @@
                             region_id: question.region_id || '',
                             district_id: question.district_id || '',
                             commune_id: question.commune_id || '',
+                            selected_options: [], // Pour choix multiples
+                            file: null,
+                            fileName: '',
+                            preview: null
                         };
                         this.districts[question.id] = [];
                         this.communes[question.id] = [];
+
+                        // Préparer les options pour les listes et choix multiples
+                        if (question.options) {
+                            question.options_array = question.options.split('|');
+                        }
                     });
                 },
                 methods: {
+                    handleFileUpload(questionId, event) {
+                        const file = event.target.files[0];
+                        const question = this.questions.find(q => q.id === questionId);
+
+                        if (!file) return;
+
+                        // Validation de la taille
+                        const maxSize = question.type === 'image' ? 5 * 1024 * 1024 : 10 * 1024 *
+                        1024; // 5MB pour image, 10MB pour PDF
+                        if (file.size > maxSize) {
+                            this.$notyf.error(
+                                `Le fichier est trop volumineux (max ${question.type === 'image' ? '5MB' : '10MB'})`
+                                );
+                            return;
+                        }
+
+                        this.responses[questionId].file = file;
+                        this.responses[questionId].fileName = file.name;
+
+                        // Créer aperçu pour les images
+                        if (question.type === 'image') {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.responses[questionId].preview = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    },
+
+                    removeFile(questionId) {
+                        this.responses[questionId].file = null;
+                        this.responses[questionId].fileName = '';
+                        this.responses[questionId].preview = null;
+
+                        // Reset input file
+                        const fileInput = this.$refs['file_' + questionId][0];
+                        if (fileInput) {
+                            fileInput.value = '';
+                        }
+                    },
+
                     async fetchDistricts(questionId) {
                         const regionId = this.responses[questionId].region_id;
                         this.responses[questionId].district_id = '';
@@ -314,6 +472,7 @@
                             }
                         }
                     },
+
                     async fetchCommunes(questionId) {
                         const districtId = this.responses[questionId].district_id;
                         this.responses[questionId].commune_id = '';
@@ -337,26 +496,41 @@
                             }
                         }
                     },
+
                     async submitForm() {
                         this.isSubmitting = true;
-                        const formData = new FormData(this.$refs.applicationForm);
+                        const formData = new FormData();
+
+                        // Ajouter les données de base
+                        formData.append('_token', '{{ csrf_token() }}');
                         formData.append('offre_id', this.offreId);
 
-                        // Ajouter les réponses manuellement pour assurer la bonne structure
+                        // Ajouter les réponses
                         Object.keys(this.responses).forEach(questionId => {
-                            formData.set(`reponses[${questionId}][valeur]`, this.responses[questionId]
-                                .valeur || '');
-                            if (this.responses[questionId].region_id) {
-                                formData.set(`reponses[${questionId}][region_id]`, this.responses[
-                                    questionId].region_id);
+                            const response = this.responses[questionId];
+                            const question = this.questions.find(q => q.id == questionId);
+
+                            if (question.type === 'choix_multiple') {
+                                formData.append(`reponses[${questionId}][valeur]`, response.selected_options
+                                    .join(', '));
+                            } else if (question.type === 'image' || question.type === 'fichier') {
+                                if (response.file) {
+                                    formData.append(`reponses[${questionId}][fichier]`, response.file);
+                                }
+                            } else {
+                                formData.append(`reponses[${questionId}][valeur]`, response.valeur || '');
                             }
-                            if (this.responses[questionId].district_id) {
-                                formData.set(`reponses[${questionId}][district_id]`, this.responses[
-                                    questionId].district_id);
+
+                            // Données géographiques
+                            if (response.region_id) {
+                                formData.append(`reponses[${questionId}][region_id]`, response.region_id);
                             }
-                            if (this.responses[questionId].commune_id) {
-                                formData.set(`reponses[${questionId}][commune_id]`, this.responses[
-                                    questionId].commune_id);
+                            if (response.district_id) {
+                                formData.append(`reponses[${questionId}][district_id]`, response
+                                    .district_id);
+                            }
+                            if (response.commune_id) {
+                                formData.append(`reponses[${questionId}][commune_id]`, response.commune_id);
                             }
                         });
 

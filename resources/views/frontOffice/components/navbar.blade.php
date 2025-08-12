@@ -25,21 +25,16 @@
                 @auth
                     <profile-dropdown>
                         <template #button>
-                            @if (Auth::user()->photo)
-                                <img src="{{ Auth::user()->photo }}" alt="{{ Auth::user()->nom }}"
-                                    class="w-8 h-8 rounded-full object-cover" />
-                            @else
-                                <div class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-right">
-                                    <span class="text-gray-600 font-medium text-xs">
-                                        {{ strtoupper(substr(Auth::user()->nom, 0, 1)) }}
-                                    </span>
-                                </div>
-                            @endif
+                            <div class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-right">
+                                <span class="text-gray-600 font-medium text-xs">
+                                    {{ strtoupper(substr(Auth::user()->nom, 0, 1)) }}
+                                </span>
+                            </div>
                             <span class="hidden md:block text-sm font-medium text-gray-900">{{ Auth::user()->nom }}</span>
                         </template>
 
                         <template #menu>
-                            <a href="/enqueteur/login"
+                            <a href="{{ route('enqueteur.profile.edit') }}"
                                 class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 <i class="fas fa-user mr-2"></i>
                                 Mon profil

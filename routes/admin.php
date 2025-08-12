@@ -69,6 +69,13 @@ Route::middleware('auth:admin')->group(function () {
 
     // Analytiques
     Route::get('/analytics/{timeRange}', [AnalyticsController::class, 'getAnalytics']);
+
+
+    // Mise ajours de l'offre et finalisation Laza
+    Route::get('/candidatures/{candidature}/responses', [OffreController::class, 'showCandidateResponses'])
+        ->name('candidatures.responses');
+    Route::put('/postule-offre/{candidature}', [OffreController::class, 'updateCandidatureStatus'])
+        ->name('admin.candidatures.update-status');
 });
 
 

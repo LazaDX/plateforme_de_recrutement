@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Enqueteur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EnqueteurController extends Controller
 {
@@ -64,9 +67,10 @@ class EnqueteurController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit()
     {
-        //
+        $enqueteur = Auth::user();
+        return view('frontOffice.pages.profile', compact('enqueteur'));
     }
 
     /**
@@ -76,10 +80,46 @@ class EnqueteurController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        $enqueteur = Auth::user();
+
+        if (!$enqueteur) {
+            return response()->json(['error' => 'Utilisateur non authentifié'], 401);
+        }
+
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:enqueteurs,email,' . $enqueteur->id,
+            'date_de_naissance' => 'nullable|date',
+            'diplomes' => 'nullable|string|max:1000',
+            'experiences' => 'nullable|string|max:1000',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png|max:5120',
+        ]);
+
+        $enqueteur->fill($request->except('photo'));
+
+        if ($request->hasFile('photo')) {
+            if ($enqueteur->photo && Storage::exists('public/' . $enqueteur->photo)) {
+                Storage::delete('public/' . $enqueteur->photo);
+            }
+            $file = $request->file('photo');
+            $extension = $file->getClientOriginalExtension();
+            $fileName = Str::slug($request->nom . ' ' . $request->prenom) . '-' . time() . '.' . $extension;
+            $path = $file->storeAs('profileEnqueteur', $fileName, 'public');
+            $validated['photo'] = $path;
+        }
+
+        $enqueteur->update($validated);
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => $enqueteur,
+            'photo_url' => $enqueteur->photo ? asset('storage/' . $enqueteur->photo) : null
+        ]);
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -6,14 +6,21 @@
     <div id="app" class="container mx-auto p-4">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Candidatures pour : {{ $offre->nom_enquete }}</h1>
-            <a href="{{ route('admin.offers') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                        clip-rule="evenodd" />
-                </svg>
-                Retour aux offres
-            </a>
+            <div class="flex gap-3">
+                <button @click="showOfferDetails = true"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Détails de l'offre
+                </button>
+                <a href="{{ route('admin.offers') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Retour aux offres
+                </a>
+            </div>
         </div>
 
         <!-- Stats Cards -->
@@ -168,9 +175,9 @@
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-right">
                                         <div class="flex justify-end gap-1">
-                                            {{-- <a href="{{ route('admin.postule-offre.show', $candidature->id) }}"
+                                            <button @click="viewResponses({{ $candidature->id }})"
                                                 class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
-                                                title="Voir détails">
+                                                title="Voir les réponses">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
                                                     viewBox="0 0 20 20" fill="currentColor">
                                                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -178,7 +185,7 @@
                                                         d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                            </a> --}}
+                                            </button>
                                             <button
                                                 class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
                                                 title="Accepter"
@@ -222,6 +229,210 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal Détails de l'offre -->
+        <div v-show="showOfferDetails"
+            class="fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4 transition-opacity duration-300"
+            :class="{ 'opacity-0 pointer-events-none': !showOfferDetails, 'opacity-100': showOfferDetails }">
+            <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300"
+                :class="{ 'translate-y-10 opacity-0': !showOfferDetails, 'translate-y-0 opacity-100': showOfferDetails }">
+                <div
+                    class="border-b border-gray-200 px-6 py-4 flex justify-between items-center bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-t-2xl">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Détails de l'offre
+                    </h2>
+                    <button @click="showOfferDetails = false" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">{{ $offre->nom_enquete }}</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-calendar-alt mr-3 text-blue-600"></i>
+                                    <span class="font-medium mr-2">Créé le:</span>
+                                    {{ optional($offre->created_at)->format('d/m/Y à H:i') ?? 'Non défini' }}
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-clock mr-3 text-orange-600"></i>
+                                    <span class="font-medium mr-2">Date limite:</span>
+                                    {{ optional(\Carbon\Carbon::parse($offre->date_limite))->format('d/m/Y') ?? 'Non défini' }}
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-exclamation-triangle mr-3 text-red-600"></i>
+                                    <span class="font-medium mr-2">Priorité:</span>
+                                    <span
+                                        class="px-2 py-1 rounded-full text-xs font-medium
+                                        {{ $offre->priorite === 'haute' ? 'bg-red-100 text-red-800' : ($offre->priorite === 'moyenne' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800') }}">
+                                        {{ ucfirst($offre->priorite) }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-flag mr-3 text-green-600"></i>
+                                    <span class="font-medium mr-2">Statut:</span>
+                                    <span
+                                        class="px-2 py-1 rounded-full text-xs font-medium
+                                        {{ $offre->status_offre === 'publiee' ? 'bg-green-100 text-green-800' : ($offre->status_offre === 'brouillon' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
+                                        {{ ucfirst(str_replace('_', ' ', $offre->status_offre)) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-md font-semibold text-gray-800 mb-3">Statistiques</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-xs text-blue-600 font-medium">Candidatures</p>
+                                    <p class="text-xl font-bold text-blue-800">{{ $offre->postuleOffre->count() }}</p>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-lg">
+                                    <p class="text-xs text-green-600 font-medium">Visites</p>
+                                    <p class="text-xl font-bold text-green-800">{{ $offre->visites ?? 0 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-md font-semibold text-gray-800 mb-3">Description de l'enquête</h4>
+                        <div class="prose prose-sm max-w-none text-gray-700 p-4 bg-gray-50 rounded-lg">
+                            {!! $offre->details_enquete !!}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Réponses de l'enquêteur -->
+        <div v-show="showResponsesModal"
+            class="fixed inset-0 z-[1000] bg-black bg-opacity-60 flex items-center justify-center p-4 transition-opacity duration-300"
+            :class="{ 'opacity-0 pointer-events-none': !showResponsesModal, 'opacity-100': showResponsesModal }">
+            <div class="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300"
+                :class="{ 'translate-y-10 opacity-0': !showResponsesModal, 'translate-y-0 opacity-100': showResponsesModal }">
+                <div
+                    class="border-b border-gray-200 px-6 py-4 flex justify-between items-center bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-t-2xl">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        Réponses de @{{ currentCandidate?.enqueteur?.nom }}
+                    </h2>
+                    <button @click="showResponsesModal = false" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div v-if="loadingResponses" class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-blue-600 mb-4"></i>
+                        <p class="text-gray-600">Chargement des réponses...</p>
+                    </div>
+                    <div v-else-if="candidateResponses.length === 0" class="text-center py-8">
+                        <i class="fas fa-inbox text-3xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600">Aucune réponse trouvée pour cette candidature.</p>
+                    </div>
+                    <div v-else class="space-y-6">
+                        <div v-for="response in candidateResponses" :key="response.id"
+                            class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-3">
+                                <h3 class="font-medium text-gray-800 flex items-center">
+                                    <i :class="getQuestionIcon(response.question_formulaire?.type)"
+                                        class="mr-2 text-blue-600"></i>
+                                    @{{ response.question_formulaire?.label || 'Question supprimée' }}
+                                </h3>
+                                <span v-if="response.question_formulaire?.obligation"
+                                    class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-medium">
+                                    Obligatoire
+                                </span>
+                            </div>
+
+                            <div class="ml-6">
+                                <!-- Réponse texte normale -->
+                                <div v-if="response.question_formulaire?.type !== 'image' && response.question_formulaire?.type !== 'fichier' && response.question_formulaire?.type !== 'geographique'"
+                                    class="bg-gray-50 p-3 rounded-lg">
+                                    <p class="text-gray-700" v-if="response.valeur">@{{ response.valeur }}</p>
+                                    <p class="text-gray-400 italic" v-else>Aucune réponse</p>
+                                </div>
+
+                                <!-- Réponse géographique -->
+                                <div v-if="response.question_formulaire?.type === 'geographique'"
+                                    class="bg-blue-50 p-3 rounded-lg">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                                        <div v-if="response.region">
+                                            <span class="font-medium text-blue-700">Région:</span>
+                                            <p class="text-gray-700">@{{ response.region.region }}</p>
+                                        </div>
+                                        <div v-if="response.district">
+                                            <span class="font-medium text-blue-700">District:</span>
+                                            <p class="text-gray-700">@{{ response.district.district }}</p>
+                                        </div>
+                                        <div v-if="response.commune">
+                                            <span class="font-medium text-blue-700">Commune:</span>
+                                            <p class="text-gray-700">@{{ response.commune.commune }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Réponse image -->
+                                <div v-if="response.question_formulaire?.type === 'image' && response.fichier_path"
+                                    class="bg-green-50 p-3 rounded-lg">
+                                    <div class="flex items-center gap-4">
+                                        <img :src="'/storage/' + response.fichier_path"
+                                            :alt="response.question_formulaire.label"
+                                            class="w-24 h-24 object-cover rounded-lg shadow-md cursor-pointer"
+                                            @click="openImagePreview(response.fichier_path)">
+                                        <div>
+                                            <p class="text-sm font-medium text-green-700 mb-1">Image téléchargée</p>
+                                            <p class="text-xs text-gray-600">Cliquez sur l'image pour agrandir</p>
+                                            <a :href="'/storage/' + response.fichier_path" download
+                                                class="inline-flex items-center text-xs text-green-600 hover:text-green-800 mt-1">
+                                                <i class="fas fa-download mr-1"></i>Télécharger
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Réponse fichier -->
+                                <div v-if="response.question_formulaire?.type === 'fichier' && response.fichier_path"
+                                    class="bg-red-50 p-3 rounded-lg">
+                                    <div class="flex items-center gap-4">
+                                        <i class="fas fa-file-pdf text-4xl text-red-600"></i>
+                                        <div>
+                                            <p class="text-sm font-medium text-red-700 mb-1">Fichier PDF</p>
+                                            <p class="text-xs text-gray-600 mb-2">@{{ response.fichier_path.split('/').pop() }}</p>
+                                            <div class="flex gap-2">
+                                                <a :href="'/storage/' + response.fichier_path" target="_blank"
+                                                    class="inline-flex items-center text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                                                    <i class="fas fa-eye mr-1"></i>Voir
+                                                </a>
+                                                <a :href="'/storage/' + response.fichier_path" download
+                                                    class="inline-flex items-center text-xs bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">
+                                                    <i class="fas fa-download mr-1"></i>Télécharger
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="(response.question_formulaire?.type === 'image' || response.question_formulaire?.type === 'fichier') && !response.fichier_path"
+                                    class="bg-gray-50 p-3 rounded-lg">
+                                    <p class="text-gray-400 italic">Aucun fichier téléchargé</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal aperçu image -->
+        <div v-show="imagePreview"
+            class="fixed inset-0 z-[1100] bg-black bg-opacity-80 flex items-center justify-center p-4"
+            @click="imagePreview = null">
+            <div class="max-w-4xl max-h-full">
+                <img :src="imagePreview" alt="Aperçu"
+                    class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.31/dist/vue.global.min.js"></script>
@@ -243,6 +454,12 @@
             setup() {
                 const searchQuery = ref('');
                 const statusFilter = ref('');
+                const showOfferDetails = ref(false);
+                const showResponsesModal = ref(false);
+                const currentCandidate = ref(null);
+                const candidateResponses = ref([]);
+                const loadingResponses = ref(false);
+                const imagePreview = ref(null);
 
                 const filterCandidates = () => {
                     // Implémentation côté serveur pour le moment
@@ -273,11 +490,66 @@
                     }
                 };
 
+                const viewResponses = async (candidatureId) => {
+                    loadingResponses.value = true;
+                    showResponsesModal.value = true;
+                    candidateResponses.value = [];
+
+                    try {
+                        const response = await fetch(`/admin/candidatures/${candidatureId}/responses`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                            }
+                        });
+
+                        if (!response.ok) throw new Error('Erreur lors du chargement');
+
+                        const data = await response.json();
+                        currentCandidate.value = data.candidature;
+                        candidateResponses.value = data.responses;
+                    } catch (error) {
+                        notyf.error('Impossible de charger les réponses');
+                        showResponsesModal.value = false;
+                    } finally {
+                        loadingResponses.value = false;
+                    }
+                };
+
+                const getQuestionIcon = (type) => {
+                    const icons = {
+                        'texte': 'fas fa-font',
+                        'email': 'fas fa-envelope',
+                        'long_texte': 'fas fa-align-left',
+                        'nombre': 'fas fa-hashtag',
+                        'liste': 'fas fa-list',
+                        'choix_multiple': 'fas fa-check-square',
+                        'image': 'fas fa-image',
+                        'fichier': 'fas fa-file-pdf',
+                        'geographique': 'fas fa-map-marker-alt'
+                    };
+                    return icons[type] || 'fas fa-question-circle';
+                };
+
+                const openImagePreview = (imagePath) => {
+                    imagePreview.value = '/storage/' + imagePath;
+                };
+
                 return {
                     searchQuery,
                     statusFilter,
+                    showOfferDetails,
+                    showResponsesModal,
+                    currentCandidate,
+                    candidateResponses,
+                    loadingResponses,
+                    imagePreview,
                     filterCandidates,
-                    changeStatus
+                    changeStatus,
+                    viewResponses,
+                    getQuestionIcon,
+                    openImagePreview
                 };
             }
         }).mount('#app');
