@@ -175,6 +175,18 @@
                                         :required="question.obligation">
                                 </div>
 
+                                <!-- Date -->
+                                <div v-else-if="question.type === 'date'" class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                        <i class="fas fa-calendar"></i>
+                                    </div>
+                                    <input type="date" v-model="responses[question.id].valeur"
+                                        :name="'reponses[' + question.id + '][valeur]'"
+                                        class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        :required="question.obligation">
+                                </div>
+
                                 <!-- Liste déroulante -->
                                 <div v-else-if="question.type === 'liste'" class="relative">
                                     <div
@@ -414,11 +426,11 @@
 
                         // Validation de la taille
                         const maxSize = question.type === 'image' ? 5 * 1024 * 1024 : 10 * 1024 *
-                        1024; // 5MB pour image, 10MB pour PDF
+                            1024; // 5MB pour image, 10MB pour PDF
                         if (file.size > maxSize) {
                             this.$notyf.error(
                                 `Le fichier est trop volumineux (max ${question.type === 'image' ? '5MB' : '10MB'})`
-                                );
+                            );
                             return;
                         }
 

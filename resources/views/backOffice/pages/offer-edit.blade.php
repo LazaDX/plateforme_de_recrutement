@@ -69,6 +69,7 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300">
                             <option value="texte">Texte</option>
                             <option value="email">Email</option>
+                            <option value="date">Date</option>
                             <option value="long_texte">Zone de texte</option>
                             <option value="nombre">Nombre</option>
                             <option value="file">Fichier</option>

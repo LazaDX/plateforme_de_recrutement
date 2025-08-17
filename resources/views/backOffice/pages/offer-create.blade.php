@@ -81,6 +81,7 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300">
                                 <option value="texte">Texte</option>
                                 <option value="email">Email</option>
+                                <option value="date">Date</option>
                                 <option value="long_texte">Zone de texte</option>
                                 <option value="nombre">Nombre</option>
                                 <option value="liste">Liste déroulante</option>
@@ -218,13 +219,16 @@
                                     <!-- Région seule -->
                                     <div v-if="newField.constraint_level === 'region'">
                                         <label class="block text-xs text-gray-600 mb-1">Région</label>
-                                        <select class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
-                                            <option>Sélectionner une région...</option>
+                                        <select v-model="selectedRegion"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                                            <option :value="null">Sélectionner une région...</option>
+                                            <option v-for="r in regions" :key="r.id" :value="r.id">
+                                                @{{ r.region }}</option>
                                         </select>
                                     </div>
                                     <!-- Affichage en lecture seule -->
                                     <div
-                                        v-if="newField.show_region && newField.constraint_level !== 'all' && newField.constraint_level !== 'region_district' && newField.constraint_level !== 'region'">
+                                        v-if="newField.region_id && newField.show_region && newField.constraint_level !== 'all' && newField.constraint_level !== 'region_district' && newField.constraint_level !== 'region'">
                                         <label class="block text-xs text-gray-600 mb-1">Région</label>
                                         <input type="text" :value="getSelectedRegionName"
                                             class="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-gray-100"
@@ -233,19 +237,28 @@
                                     <div
                                         v-if="newField.show_district && newField.constraint_level !== 'all' && newField.constraint_level !== 'region_district'">
                                         <label class="block text-xs text-gray-600 mb-1">District</label>
-                                        <input v-if="newField.constraint_level === 'commune'" type="text"
+                                        <input v-if="newField.district_id" type="text"
                                             :value="getSelectedDistrictName"
                                             class="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-gray-100"
                                             readonly>
                                         <select v-else class="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-                                            disabled>
-                                            <option>Sélectionner un district...</option>
+                                            :disabled="!newField.region_id">
+                                            <option :value="null">Sélectionner un district...</option>
+                                            <option v-for="d in districts" :key="d.id" :value="d.id">
+                                                @{{ d.district }}</option>
                                         </select>
                                     </div>
                                     <div v-if="newField.show_commune && newField.constraint_level !== 'all'">
                                         <label class="block text-xs text-gray-600 mb-1">Commune</label>
-                                        <select class="w-full px-3 py-2 border border-gray-300 rounded text-sm" disabled>
-                                            <option>Sélectionner une commune...</option>
+                                        <input v-if="newField.commune_id" type="text" :value="getSelectedCommuneName"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-gray-100"
+                                            readonly>
+                                        <select v-else v-model="selectedCommune"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                            :disabled="!newField.district_id">
+                                            <option :value="null">Sélectionner une commune...</option>
+                                            <option v-for="c in communes" :key="c.id" :value="c.id">
+                                                @{{ c.commune }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -323,13 +336,13 @@
                                         <div class="font-medium text-gray-700">District + Commune</div>
                                         <div class="text-sm text-gray-500">L'utilisateur choisit district et commune,
                                             région en
-                                            lecture seule si spécifiée</div>
+                                            lecture seule</div>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Configuration spécifique -->
+                        <!-- Configuration spécifique pour district -->
                         <div v-if="newField.constraint_level === 'district'" class="mb-4 p-4 bg-gray-50 rounded-lg">
                             <h5 class="font-medium text-gray-700 mb-3">Configuration pour district seul</h5>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -357,6 +370,66 @@
                             </div>
                         </div>
 
+                        <!-- Configuration spécifique pour commune -->
+                        <div v-if="newField.constraint_level === 'commune'" class="mb-4 p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium text-gray-700 mb-3">Configuration pour commune seule</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Région
+                                        (obligatoire)</label>
+                                    <select v-model="newField.region_id" @change="loadDistricts(newField.region_id)"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300"
+                                        required>
+                                        <option :value="null" disabled>Sélectionner une région...</option>
+                                        <option v-for="r in regions" :key="r.id" :value="r.id">
+                                            @{{ r.region }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">District
+                                        (obligatoire)</label>
+                                    <select v-model="newField.district_id" @change="loadCommunes(newField.district_id)"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300"
+                                        :disabled="!newField.region_id" required>
+                                        <option :value="null" disabled>Sélectionner un district...</option>
+                                        <option v-for="d in districts" :key="d.id" :value="d.id">
+                                            @{{ d.district }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Commune spécifique
+                                        (optionnel)</label>
+                                    <select v-model="newField.commune_id"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300"
+                                        :disabled="!newField.district_id">
+                                        <option :value="null">Toutes les communes</option>
+                                        <option v-for="c in communes" :key="c.id" :value="c.id">
+                                            @{{ c.commune }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuration spécifique pour district + commune -->
+                        <div v-if="newField.constraint_level === 'district_commune'"
+                            class="mb-4 p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium text-gray-700 mb-3">Configuration pour district + commune</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Région
+                                        (obligatoire)</label>
+                                    <select v-model="newField.region_id" @change="loadDistricts(newField.region_id)"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300"
+                                        required>
+                                        <option :value="null" disabled>Sélectionner une région...</option>
+                                        <option v-for="r in regions" :key="r.id" :value="r.id">
+                                            @{{ r.region }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Résumé de la configuration -->
                         <div v-if="newField.constraint_level" class="p-4 bg-green-50 rounded-lg border border-green-200">
                             <h5 class="font-medium text-green-700 mb-2">📋 Résumé de la configuration</h5>
                             <div class="text-sm text-green-600">
@@ -367,7 +440,7 @@
                                     L'utilisateur choisira région et district via combobox.
                                 </div>
                                 <div v-if="newField.constraint_level === 'region'">
-                                    L'utilisateur chois ira parmi toutes les régions via combobox.
+                                    L'utilisateur choisira parmi toutes les régions via combobox.
                                 </div>
                                 <div v-if="newField.constraint_level === 'district' && !newField.region_id">
                                     L'utilisateur choisira parmi tous les districts, sans région spécifiée.
@@ -435,7 +508,6 @@
                     form: {
                         nom_enquete: '',
                         details_enquete: '',
-                        date_debut: '',
                         date_limite: '',
                         priorite: 'moyenne',
                         status_offre: 'publiee',
@@ -495,9 +567,12 @@
                     if (this.newField.constraint_level === 'region_district') return true;
                     if (this.newField.constraint_level === 'region') return true;
                     if (this.newField.constraint_level === 'district') return true;
-                    if (this.newField.constraint_level === 'commune') return this.newField.region_id && this
-                        .newField.district_id;
-                    if (this.newField.constraint_level === 'district_commune') return true;
+                    if (this.newField.constraint_level === 'commune') {
+                        return this.newField.region_id && this.newField.district_id;
+                    }
+                    if (this.newField.constraint_level === 'district_commune') {
+                        return this.newField.region_id;
+                    }
                     return false;
                 }
             },
@@ -598,23 +673,37 @@
                         this.notyf.error('Le label est requis');
                         return;
                     }
-                    if ((this.newField.type === 'liste' || this.newField.type === 'choix_multiple') && this.newField
-                        .options.length === 0) {
+
+                    if ((this.newField.type === 'liste' || this.newField.type === 'choix_multiple') &&
+                        (!this.newField.options || this.newField.options.length === 0)) {
                         this.notyf.error('Ajoutez au moins une option');
                         return;
                     }
+
                     if (this.newField.type === 'geographique' && !this.isConfigurationValid) {
                         this.notyf.error('Veuillez compléter la configuration géographique');
                         return;
                     }
-                    this.formulaire.push({
-                        ...this.newField
-                    });
+
+                    // Créer une copie profonde du champ pour éviter les références partagées
+                    const fieldToAdd = {
+                        type: this.newField.type,
+                        label: this.newField.label.trim(),
+                        obligation: Boolean(this.newField.obligation),
+                        options: Array.isArray(this.newField.options) ? [...this.newField.options] : [],
+                        constraint_level: this.newField.constraint_level,
+                        region_id: this.newField.region_id,
+                        district_id: this.newField.district_id,
+                        commune_id: this.newField.commune_id,
+                        show_region: this.newField.show_region,
+                        show_district: this.newField.show_district,
+                        show_commune: this.newField.show_commune
+                    };
+
+                    this.formulaire.push(fieldToAdd);
                     this.resetNewField();
                 },
-                removeField(index) {
-                    this.formulaire.splice(index, 1);
-                },
+
                 resetNewField() {
                     this.newField = {
                         type: 'texte',
@@ -634,24 +723,90 @@
                     this.communes = [];
                 },
                 async saveOffre() {
+                    // Validation côté client
+                    if (!this.form.nom_enquete.trim()) {
+                        this.notyf.error("Le nom de l'enquête est requis.");
+                        return;
+                    }
+                    if (!this.form.date_limite) {
+                        this.notyf.error("La date limite est requise.");
+                        return;
+                    }
                     if (this.formulaire.length === 0) {
                         this.notyf.error("Ajoutez au moins une question.");
                         return;
                     }
+
                     try {
-                        const response = await axios.post('{{ route('admin.offers.store') }}', {
-                            form: this.form,
-                            formulaire: this.formulaire
+                        // Préparer les données exactement comme votre ancien code
+                        const payload = {
+                            form: {
+                                nom_enquete: this.form.nom_enquete || '',
+                                details_enquete: this.form.details_enquete || '',
+                                date_debut: this.form.date_debut ||
+                                    null, // Ajoutez cette ligne si vous avez un champ date_debut
+                                date_limite: this.form.date_limite || '',
+                                priorite: this.form.priorite || 'moyenne',
+                                status_offre: this.form.status_offre || 'publiee'
+                            },
+                            formulaire: this.formulaire.map(field => {
+                                // Créer l'objet de base pour chaque question
+                                const questionData = {
+                                    label: field.label || '',
+                                    type: field.type || 'texte',
+                                    obligation: Boolean(field.obligation)
+                                };
+
+                                // Ajouter les options si c'est une liste ou choix multiple
+                                if ((field.type === 'liste' || field.type === 'choix_multiple') &&
+                                    Array.isArray(field.options)) {
+                                    questionData.options = field.options;
+                                }
+
+                                // Ajouter les données géographiques si c'est un champ géographique
+                                if (field.type === 'geographique') {
+                                    questionData.constraint_level = field.constraint_level || 'all';
+                                    questionData.region_id = field.region_id || null;
+                                    questionData.district_id = field.district_id || null;
+                                    questionData.commune_id = field.commune_id || null;
+                                }
+
+                                return questionData;
+                            })
+                        };
+
+                        console.log('Données envoyées:', payload); // Pour déboguer
+
+                        const response = await axios.post('{{ route('admin.offers.store') }}', payload, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    ?.getAttribute('content') || ''
+                            }
                         });
+
                         this.notyf.success('Offre créée avec succès !');
                         setTimeout(() => {
                             window.location.href = '{{ route('admin.offers') }}';
                         }, 1000);
+
                     } catch (error) {
-                        console.error('Erreur lors de l\'enregistrement', error.response?.data || error
-                            .message);
-                        this.notyf.error(
-                            'Erreur lors de la création de l\'offre. Veuillez réessayer plus tard.');
+                        console.error('Erreur complète:', error);
+                        console.error('Réponse du serveur:', error.response?.data);
+
+                        let errorMessage = 'Erreur lors de la création de l\'offre.';
+
+                        if (error.response?.data?.error) {
+                            errorMessage = error.response.data.error;
+                        } else if (error.response?.data?.message) {
+                            errorMessage = error.response.data.message;
+                        } else if (error.response?.data?.messages) {
+                            // Gestion des erreurs de validation
+                            const errors = Object.values(error.response.data.messages).flat();
+                            errorMessage = errors.join(', ');
+                        }
+
+                        this.notyf.error(errorMessage);
                     }
                 }
             }

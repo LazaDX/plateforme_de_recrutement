@@ -6,6 +6,7 @@ use App\Http\Controllers\OffreController;
 use App\Http\Controllers\GeoController;
 use App\Http\Controllers\EnqueteurController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\CandidatureExportController;
 
 Route::middleware('guest:admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
@@ -76,6 +77,14 @@ Route::middleware('auth:admin')->group(function () {
         ->name('candidatures.responses');
     Route::put('/postule-offre/{candidature}', [OffreController::class, 'updateCandidatureStatus'])
         ->name('admin.candidatures.update-status');
+
+
+    Route::post('offers/{offre}/export-excel', [CandidatureExportController::class, 'exportExcel'])
+        ->name('offers.export-excel');
+
+    // Route pour la recherche de candidatures (optionnelle)
+    Route::get('offers/{offre}/search-candidatures', [CandidatureExportController::class, 'searchCandidatures'])
+        ->name('offers.search-candidatures');
 });
 
 

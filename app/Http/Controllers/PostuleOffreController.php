@@ -42,89 +42,100 @@ class PostuleOffreController extends Controller
 
         // $postule = $offre->postuleOffre()->create($data);
         // return response()->json($postule, 201);
+        try {
+            if (!auth()->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous devez être connecté pour postuler.'
+                ], 401);
+            }
 
-        if (!auth()->check()) {
-            return redirect()->route('login')->with('error', 'Vous devez être connecté pour postuler.');
-        }
+            $offre->load('questionFormulaire');
 
-        $offre->load('questionFormulaire');
+            // Vérifier si l'enquêteur a déjà postulé
+            $existingApplication = PostuleOffre::where('offre_id', $offre->id)
+                ->where('enqueteur_id', auth()->id())
+                ->first();
 
-        // Vérifier si l'enquêteur a déjà postulé
-        $existingApplication = PostuleOffre::where('offre_id', $offre->id)
-            ->where('enqueteur_id', auth()->id())
-            ->first();
+            if ($existingApplication) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous avez déjà postulé pour cette offre.'
+                ], 422);
+            }
 
-        if ($existingApplication) {
+            // Validation des réponses
+            $rules = [];
+            foreach ($offre->questionFormulaire as $question) {
+                if ($question->obligation) {
+                    if (in_array($question->type, ['image', 'fichier'])) {
+                        $rules["reponses.{$question->id}.fichier"] = 'required|file';
+                    } elseif ($question->type === 'geographique') {
+                        // Valider les champs géographiques selon les options
+                        if ($question->all_regions && !$question->region_id) {
+                            $rules["reponses.{$question->id}.region_id"] = 'required|integer|exists:regions,id';
+                        }
+                        if ($question->all_districts && !$question->district_id) {
+                            $rules["reponses.{$question->id}.district_id"] = 'required|integer|exists:districts,id';
+                        }
+                        if ($question->all_communes && !$question->commune_id) {
+                            $rules["reponses.{$question->id}.commune_id"] = 'required|integer|exists:communes,id';
+                        }
+                    } else {
+                        $rules["reponses.{$question->id}.valeur"] = 'required';
+                    }
+                }
+            }
+
+            $request->validate($rules);
+
+            // Créer la candidature
+            $candidature = PostuleOffre::create([
+                'offre_id' => $offre->id,
+                'enqueteur_id' => auth()->id(),
+                'date_postule' => now(),
+                'type_enqueteur' => 'externe',
+                'status_postule' => 'en_attente'
+            ]);
+
+            // Sauvegarder les réponses
+            foreach ($offre->questionFormulaire as $question) {
+                $reponseData = [
+                    'postule_offre_id' => $candidature->id,
+                    'question_id' => $question->id,
+                ];
+
+                if ($question->type === 'image' || $question->type === 'fichier') {
+                    if ($request->hasFile("reponses.{$question->id}.fichier")) {
+                        $file = $request->file("reponses.{$question->id}.fichier");
+                        $folder = $question->type === 'image' ? 'ImageEnqueteur' : 'FichierEnqueteur';
+                        $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+                        $path = $file->storeAs($folder, $filename, 'public');
+                        $reponseData['fichier_path'] = $path;
+                    }
+                } elseif ($question->type === 'geographique') {
+                    $reponseData['region_id'] = $request->input("reponses.{$question->id}.region_id") ?? null;
+                    $reponseData['district_id'] = $request->input("reponses.{$question->id}.district_id") ?? null;
+                    $reponseData['commune_id'] = $request->input("reponses.{$question->id}.commune_id") ?? null;
+                } else {
+                    $reponseData['valeur'] = $request->input("reponses.{$question->id}.valeur") ?? '';
+                }
+
+                ReponseFormulaire::create($reponseData);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Votre candidature a été envoyée avec succès !'
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la création de la candidature: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Vous avez déjà postulé pour cette offre.'
-            ], 422);
+                'message' => 'Erreur serveur: ' . $e->getMessage()
+            ], 500);
         }
 
-        // Validation des réponses
-        $rules = [];
-        foreach ($offre->questionFormulaire as $question) {
-            if ($question->obligation) {
-                if (in_array($question->type, ['image', 'fichier'])) {
-                    $rules["reponses.{$question->id}.fichier"] = 'required';
-                } else {
-                    $rules["reponses.{$question->id}.valeur"] = 'required';
-                }
-            }
-        }
-
-        $request->validate($rules);
-
-        // Créer la candidature
-        $candidature = PostuleOffre::create([
-            'offre_id' => $offre->id,
-            'enqueteur_id' => auth()->id(),
-            'date_postule' => now(),
-            'type_enqueteur' => 'externe', // ou selon votre logique
-            'status_postule' => 'en_attente'
-        ]);
-
-        // Sauvegarder les réponses
-        foreach ($offre->questionFormulaire as $question) {
-            $reponseData = [
-                'postule_offre_id' => $candidature->id,
-                'question_id' => $question->id,
-            ];
-
-            if ($question->type === 'image' || $question->type === 'fichier') {
-                // Gestion des fichiers
-                if ($request->hasFile("reponses.{$question->id}.fichier")) {
-                    $file = $request->file("reponses.{$question->id}.fichier");
-
-                    // Déterminer le dossier de stockage
-                    $folder = $question->type === 'image' ? 'ImageEnqueteur' : 'FichierEnqueteur';
-
-                    // Générer un nom unique
-                    $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-
-                    // Stocker le fichier
-                    $path = $file->storeAs($folder, $filename, 'public');
-
-                    $reponseData['fichier_path'] = $path;
-                }
-            } elseif ($question->type === 'geographique') {
-                // Gestion des données géographiques
-                $reponseData['region_id'] = $request->input("reponses.{$question->id}.region_id");
-                $reponseData['district_id'] = $request->input("reponses.{$question->id}.district_id");
-                $reponseData['commune_id'] = $request->input("reponses.{$question->id}.commune_id");
-            } else {
-                // Réponses texte normales
-                $valeur = $request->input("reponses.{$question->id}.valeur");
-                $reponseData['valeur'] = $valeur ?? '';
-            }
-
-            ReponseFormulaire::create($reponseData);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Votre candidature a été envoyée avec succès !'
-        ]);
     }
 
     /**

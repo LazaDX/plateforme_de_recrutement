@@ -29,7 +29,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total candidatures</p>
-                        <p class="text-2xl font-semibold text-gray-800">{{ $offre->postuleOffre->count() }}</p>
+                        <p class="text-2xl font-semibold text-gray-800"
+                            v-text="filteredCandidatures.length || {{ $offre->postuleOffre->count() }}"></p>
                     </div>
                     <div class="bg-blue-100 p-3 rounded-full">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none"
@@ -110,10 +111,22 @@
                             <option value="accepte">Accepté</option>
                             <option value="rejete">Rejeté</option>
                         </select>
+
+                        <button @click="exportToExcel" :disabled="exporting"
+                            class="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm">
+                            <i :class="exporting ? 'fas fa-spinner fa-spin' : 'fas fa-file-excel'" class="mr-2"></i>
+                            <span v-if="exporting">Export...</span>
+                            <span v-else>Excel</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div v-if="loading" class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
+                    <p class="mt-2 text-gray-600">Chargement...</p>
+                </div>
+
+                <div v-else class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50">
                             <tr>
@@ -135,47 +148,40 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach ($offre->postuleOffre as $candidature)
-                                <tr class="hover:bg-gray-50 transition-colors">
+                            <template v-if="filteredCandidatures.length > 0">
+                                <tr v-for="candidature in filteredCandidatures" :key="candidature.id"
+                                    class="hover:bg-gray-50 transition-colors">
                                     <td class="px-4 py-3 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div
                                                 class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <span
-                                                    class="text-blue-600 font-medium">{{ substr($candidature->enqueteur->nom, 0, 1) }}</span>
+                                                <span class="text-blue-600 font-medium"
+                                                    v-text="candidature.enqueteur.nom.charAt(0)"></span>
                                             </div>
                                             <div class="ml-3">
-                                                <p class="font-medium text-gray-900">{{ $candidature->enqueteur->nom }}</p>
-                                                <p class="text-xs text-gray-500">{{ $candidature->enqueteur->email }}</p>
+                                                <p class="font-medium text-gray-900" v-text="candidature.enqueteur.nom">
+                                                </p>
+                                                <p class="text-xs text-gray-500" v-text="candidature.enqueteur.email"></p>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        <div class="text-gray-900">
-                                            {{ \Carbon\Carbon::parse($candidature->date_postule)->format('d/m/Y') }}</div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ \Carbon\Carbon::parse($candidature->date_postule)->diffForHumans() }}</div>
+                                        <div class="text-gray-900" v-text="formatDate(candidature.date_postule)"></div>
+                                        <div class="text-xs text-gray-500"
+                                            v-text="formatDateRelative(candidature.date_postule)"></div>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        <span
-                                            class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 capitalize">{{ $candidature->type_enqueteur }}</span>
+                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 capitalize"
+                                            v-text="candidature.type_enqueteur"></span>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
-                                        @php
-                                            $statusClasses = [
-                                                'en_attente' => 'bg-yellow-100 text-yellow-800',
-                                                'accepte' => 'bg-green-100 text-green-800',
-                                                'rejete' => 'bg-red-100 text-red-800',
-                                            ];
-                                        @endphp
-                                        <span
-                                            class="px-2 py-1 text-xs rounded-full font-medium {{ $statusClasses[$candidature->status_postule] ?? 'bg-gray-100 text-gray-800' }}">
-                                            {{ $candidature->status_postule }}
-                                        </span>
+                                        <span :class="getStatusClass(candidature.status_postule)"
+                                            class="px-2 py-1 text-xs rounded-full font-medium"
+                                            v-text="candidature.status_postule"></span>
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-right">
                                         <div class="flex justify-end gap-1">
-                                            <button @click="viewResponses({{ $candidature->id }})"
+                                            <button @click="viewResponses(candidature.id)"
                                                 class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
                                                 title="Voir les réponses">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
@@ -188,8 +194,7 @@
                                             </button>
                                             <button
                                                 class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
-                                                title="Accepter"
-                                                @click="changeStatus({{ $candidature->id }}, 'accepte')">
+                                                title="Accepter" @click="changeStatus(candidature.id, 'accepte')">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
                                                     viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd"
@@ -199,7 +204,7 @@
                                             </button>
                                             <button
                                                 class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
-                                                title="Rejeter" @click="changeStatus({{ $candidature->id }}, 'rejete')">
+                                                title="Rejeter" @click="changeStatus(candidature.id, 'rejete')">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
                                                     viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd"
@@ -210,9 +215,102 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            </template>
+                            <template v-else-if="!loading">
+                                @foreach ($offre->postuleOffre as $candidature)
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span
+                                                        class="text-blue-600 font-medium">{{ substr($candidature->enqueteur->nom, 0, 1) }}</span>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="font-medium text-gray-900">{{ $candidature->enqueteur->nom }}
+                                                    </p>
+                                                    <p class="text-xs text-gray-500">{{ $candidature->enqueteur->email }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <div class="text-gray-900">
+                                                {{ \Carbon\Carbon::parse($candidature->date_postule)->format('d/m/Y') }}
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                {{ \Carbon\Carbon::parse($candidature->date_postule)->diffForHumans() }}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 capitalize">{{ $candidature->type_enqueteur }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            @php
+                                                $statusClasses = [
+                                                    'en_attente' => 'bg-yellow-100 text-yellow-800',
+                                                    'accepte' => 'bg-green-100 text-green-800',
+                                                    'rejete' => 'bg-red-100 text-red-800',
+                                                ];
+                                            @endphp
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full font-medium {{ $statusClasses[$candidature->status_postule] ?? 'bg-gray-100 text-gray-800' }}">
+                                                {{ $candidature->status_postule }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-right">
+                                            <div class="flex justify-end gap-1">
+                                                <button @click="viewResponses({{ $candidature->id }})"
+                                                    class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
+                                                    title="Voir les réponses">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                                        viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                        <path fill-rule="evenodd"
+                                                            d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
+                                                    title="Accepter"
+                                                    @click="changeStatus({{ $candidature->id }}, 'accepte')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                                        viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd"
+                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                                                    title="Rejeter"
+                                                    @click="changeStatus({{ $candidature->id }}, 'rejete')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                                        viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </template>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Message si aucun résultat -->
+                <div v-if="!loading && filteredCandidatures.length === 0 && (searchQuery || statusFilter)"
+                    class="text-center py-8">
+                    <i class="fas fa-search text-3xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600">Aucune candidature ne correspond à vos critères de recherche.</p>
+                    <button @click="clearFilters" class="mt-2 text-blue-600 hover:text-blue-800">
+                        Effacer les filtres
+                    </button>
                 </div>
 
                 <!-- Pagination -->
@@ -220,9 +318,12 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-700">
-                                Affichage de <span class="font-medium">1</span> à <span
-                                    class="font-medium">{{ $offre->postuleOffre->count() }}</span> sur <span
-                                    class="font-medium">{{ $offre->postuleOffre->count() }}</span> résultats
+                                Affichage de <span class="font-medium">1</span> à
+                                <span class="font-medium"
+                                    v-text="filteredCandidatures.length || {{ $offre->postuleOffre->count() }}"></span>
+                                sur
+                                <span class="font-medium"
+                                    v-text="totalCandidatures || {{ $offre->postuleOffre->count() }}"></span> résultats
                             </p>
                         </div>
                     </div>
@@ -452,6 +553,7 @@
 
         createApp({
             setup() {
+                // État réactif
                 const searchQuery = ref('');
                 const statusFilter = ref('');
                 const showOfferDetails = ref(false);
@@ -460,11 +562,115 @@
                 const candidateResponses = ref([]);
                 const loadingResponses = ref(false);
                 const imagePreview = ref(null);
+                const loading = ref(false);
+                const exporting = ref(false);
+                const filteredCandidatures = ref([]);
+                const allCandidatures = ref(@json($offre->postuleOffre->toArray()));
+                const totalCandidatures = ref({{ $offre->postuleOffre->count() }});
 
+                // Filtrage des candidatures
                 const filterCandidates = () => {
-                    // Implémentation côté serveur pour le moment
+                    let filtered = allCandidatures.value;
+
+                    // Filtre de recherche
+                    if (searchQuery.value) {
+                        const search = searchQuery.value.toLowerCase();
+                        filtered = filtered.filter(candidature =>
+                            candidature.enqueteur.nom.toLowerCase().includes(search) ||
+                            candidature.enqueteur.email.toLowerCase().includes(search) ||
+                            candidature.type_enqueteur.toLowerCase().includes(search)
+                        );
+                    }
+
+                    // Filtre de statut
+                    if (statusFilter.value) {
+                        filtered = filtered.filter(candidature =>
+                            candidature.status_postule === statusFilter.value
+                        );
+                    }
+
+                    filteredCandidatures.value = filtered;
                 };
 
+                // Effacer les filtres
+                const clearFilters = () => {
+                    searchQuery.value = '';
+                    statusFilter.value = '';
+                    filterCandidatures();
+                };
+
+                // Export vers Excel
+                const exportToExcel = async () => {
+                    exporting.value = true;
+
+                    try {
+                        const response = await fetch(`/admin/offers/{{ $offre->id }}/export-excel`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                search: searchQuery.value.trim() || null,
+                                status: statusFilter.value || null
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.error || `Erreur HTTP: ${response.status}`);
+                        }
+
+                        // Vérifier le type de contenu
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes(
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                            throw new Error('Format de fichier incorrect reçu du serveur');
+                        }
+
+                        // Obtenir le blob
+                        const blob = await response.blob();
+                        if (blob.size === 0) {
+                            throw new Error('Fichier vide reçu du serveur');
+                        }
+
+                        // Extraire le nom de fichier depuis les en-têtes
+                        let filename = 'candidatures_export.xlsx';
+                        const disposition = response.headers.get('content-disposition');
+                        if (disposition && disposition.includes('filename=')) {
+                            const matches = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                            if (matches && matches[1]) {
+                                filename = matches[1].replace(/['"]/g, '');
+                            }
+                        }
+
+                        // Créer et déclencher le téléchargement
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+                        link.style.display = 'none';
+
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Nettoyer l'URL
+                        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+
+                        notyf.success('Exportation Excel réussie !');
+
+                    } catch (error) {
+                        console.error('Erreur lors de l\'export Excel:', error);
+                        notyf.error(error.message || 'Erreur lors de l\'exportation Excel');
+                    } finally {
+                        exporting.value = false;
+                    }
+                };
+
+                // Changer le statut d'une candidature
                 const changeStatus = async (id, status) => {
                     try {
                         const response = await fetch(`/admin/postule-offre/${id}`, {
@@ -484,12 +690,19 @@
 
                         const data = await response.json();
                         notyf.success(data.message || 'Statut mis à jour avec succès');
-                        setTimeout(() => window.location.reload(), 1000);
+
+                        // Mettre à jour localement
+                        const candidature = allCandidatures.value.find(c => c.id === id);
+                        if (candidature) {
+                            candidature.status_postule = status;
+                            filterCandidates();
+                        }
                     } catch (error) {
                         notyf.error(error.message || 'Une erreur est survenue');
                     }
                 };
 
+                // Voir les réponses d'un candidat
                 const viewResponses = async (candidatureId) => {
                     loadingResponses.value = true;
                     showResponsesModal.value = true;
@@ -517,6 +730,7 @@
                     }
                 };
 
+                // Utilitaires
                 const getQuestionIcon = (type) => {
                     const icons = {
                         'texte': 'fas fa-font',
@@ -532,9 +746,37 @@
                     return icons[type] || 'fas fa-question-circle';
                 };
 
+                const getStatusClass = (status) => {
+                    const classes = {
+                        'en_attente': 'bg-yellow-100 text-yellow-800',
+                        'accepte': 'bg-green-100 text-green-800',
+                        'rejete': 'bg-red-100 text-red-800'
+                    };
+                    return classes[status] || 'bg-gray-100 text-gray-800';
+                };
+
+                const formatDate = (date) => {
+                    return new Date(date).toLocaleDateString('fr-FR');
+                };
+
+                const formatDateRelative = (date) => {
+                    const now = new Date();
+                    const targetDate = new Date(date);
+                    const diffTime = Math.abs(now - targetDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) return 'Hier';
+                    if (diffDays < 7) return `Il y a ${diffDays} jours`;
+                    if (diffDays < 30) return `Il y a ${Math.floor(diffDays/7)} semaines`;
+                    return `Il y a ${Math.floor(diffDays/30)} mois`;
+                };
+
                 const openImagePreview = (imagePath) => {
                     imagePreview.value = '/storage/' + imagePath;
                 };
+
+                // Initialisation
+                filterCandidates();
 
                 return {
                     searchQuery,
@@ -545,10 +787,19 @@
                     candidateResponses,
                     loadingResponses,
                     imagePreview,
+                    loading,
+                    exporting,
+                    filteredCandidatures,
+                    totalCandidatures,
                     filterCandidates,
+                    clearFilters,
+                    exportToExcel,
                     changeStatus,
                     viewResponses,
                     getQuestionIcon,
+                    getStatusClass,
+                    formatDate,
+                    formatDateRelative,
                     openImagePreview
                 };
             }
