@@ -86,6 +86,7 @@
                                 <option value="nombre">Nombre</option>
                                 <option value="liste">Liste déroulante</option>
                                 <option value="choix_multiple">Choix multiple</option>
+                                <option value="champ_multiple">Champ multiple</option>
                                 <option value="image">Image</option>
                                 <option value="fichier">Fichier PDF</option>
                                 <option value="geographique">Géographique</option>
@@ -104,7 +105,21 @@
                             </label>
                         </div>
                     </div>
-
+                    <div v-if="newField.type === 'champ_multiple'"
+                        class="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <h5 class="font-medium text-purple-800 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Information sur le champ multiple
+                        </h5>
+                        <div class="text-sm text-purple-700">
+                            <div>
+                                <i class="fas fa-plus-circle mr-2"></i>L'utilisateur pourra ajouter plusieurs valeurs pour
+                                ce champ
+                            </div>
+                            <div class="mt-1">
+                                <i class="fas fa-list mr-2"></i>Les valeurs seront stockées séparées par des virgules
+                            </div>
+                        </div>
+                    </div>
                     <!-- Options pour liste et choix multiple -->
                     <div v-if="newField.type === 'liste' || newField.type === 'choix_multiple'"
                         class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -649,6 +664,9 @@
                     this.newField.options.splice(index, 1);
                 },
                 getGeoConfigSummary(field) {
+                    if (field.type === 'champ_multiple') {
+                        return 'Champ à valeurs multiples';
+                    }
                     if (field.constraint_level === 'all') return 'Sélection complète (Région, District, Commune)';
                     if (field.constraint_level === 'region_district') return 'Région + District';
                     if (field.constraint_level === 'region') return 'Région seule';

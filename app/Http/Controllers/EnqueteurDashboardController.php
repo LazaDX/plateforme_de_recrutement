@@ -99,8 +99,6 @@ class EnqueteurDashboardController extends Controller
         }
 
         $candidatures = $query->paginate(10);
-
-        // Statistiques
         $stats = PostuleOffre::where('enqueteur_id', $enqueteur->id)
             ->selectRaw('status_postule, count(*) as count')
             ->groupBy('status_postule')
@@ -114,7 +112,6 @@ class EnqueteurDashboardController extends Controller
    {
        $enqueteur = Auth::user();
 
-       // Statistiques générales
        $stats = [
            'total' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->count(),
            'en_attente' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->where('status_postule', 'en_attente')->count(),
@@ -127,14 +124,12 @@ class EnqueteurDashboardController extends Controller
                ->count()
        ];
 
-       // Candidatures récentes
        $recentCandidatures = PostuleOffre::with('offre')
            ->where('enqueteur_id', $enqueteur->id)
            ->orderBy('date_postule', 'desc')
            ->limit(5)
            ->get();
 
-       // Nouvelles offres (pas encore postulées)
        $postuleOffreIds = PostuleOffre::where('enqueteur_id', $enqueteur->id)
            ->pluck('offre_id')
            ->toArray();

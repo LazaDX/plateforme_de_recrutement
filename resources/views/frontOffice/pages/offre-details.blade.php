@@ -140,6 +140,54 @@
                                         :required="question.obligation">
                                 </div>
 
+                                <div v-else-if="question.type === 'champ_multiple'" class="space-y-3">
+                                    <div class="space-y-2">
+                                        <div v-for="(value, index) in responses[question.id].multiple_values"
+                                            :key="index" class="flex gap-2 items-center">
+                                            <div class="relative flex-1">
+                                                <div
+                                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                                    <i class="fas fa-edit"></i>
+                                                </div>
+                                                <input type="text"
+                                                    v-model="responses[question.id].multiple_values[index]"
+                                                    :placeholder="`${question.label} ${index + 1}`"
+                                                    class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                            </div>
+                                            <button type="button" @click="removeMultipleValue(question.id, index)"
+                                                v-if="responses[question.id].multiple_values.length > 1"
+                                                class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" @click="addMultipleValue(question.id)"
+                                        class="w-full py-2 px-4 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-blue-400 hover:text-blue-600 transition-colors">
+                                        <i class="fas fa-plus mr-2"></i>Ajouter un autre @{{ question.label.toLowerCase() }}
+                                    </button>
+
+                                    <!-- Input caché pour stocker toutes les valeurs -->
+                                    <input type="hidden" :name="'reponses[' + question.id + '][valeur]'"
+                                        :value="responses[question.id].multiple_values.filter(v => v.trim()).join(', ')">
+
+                                    <!-- Affichage du résumé si des valeurs sont présentes -->
+                                    <div v-if="responses[question.id].multiple_values.filter(v => v.trim()).length > 0"
+                                        class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                        <p class="text-sm font-medium text-blue-800 mb-2">
+                                            <i class="fas fa-list mr-2"></i>Valeurs ajoutées :
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span
+                                                v-for="value in responses[question.id].multiple_values.filter(v => v.trim())"
+                                                :key="value"
+                                                class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                                @{{ value }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Zone de texte -->
                                 <div v-else-if="question.type === 'long_texte'" class="relative">
                                     <div
@@ -404,6 +452,7 @@
                             district_id: question.district_id || '',
                             commune_id: question.commune_id || '',
                             selected_options: [], // Pour choix multiples
+                            multiple_values: [''],
                             file: null,
                             fileName: '',
                             preview: null
@@ -415,9 +464,27 @@
                         if (question.options) {
                             question.options_array = question.options.split('|');
                         }
+
+                        if (question.type === 'champ_multiple') {
+                            this.responses[question.id].multiple_values = [''];
+                        }
                     });
                 },
                 methods: {
+                    // Méthode pour ajouter une nouvelle valeur dans un champ multiple
+                    addMultipleValue(questionId) {
+                        if (!this.responses[questionId].multiple_values) {
+                            this.responses[questionId].multiple_values = [''];
+                        }
+                        this.responses[questionId].multiple_values.push('');
+                    },
+
+                    // Méthode pour supprimer une valeur d'un champ multiple
+                    removeMultipleValue(questionId, index) {
+                        if (this.responses[questionId].multiple_values.length > 1) {
+                            this.responses[questionId].multiple_values.splice(index, 1);
+                        }
+                    },
                     handleFileUpload(questionId, event) {
                         const file = event.target.files[0];
                         const question = this.questions.find(q => q.id === questionId);
@@ -525,6 +592,9 @@
                             if (question.type === 'choix_multiple') {
                                 formData.append(`reponses[${questionId}][valeur]`, response.selected_options
                                     .join(', '));
+                            } else if (question.type === 'champ_multiple') {
+                                const validValues = response.multiple_values.filter(v => v && v.trim());
+                                formData.append(`reponses[${questionId}][valeur]`, validValues.join(', '));
                             } else if (question.type === 'image' || question.type === 'fichier') {
                                 if (response.file) {
                                     formData.append(`reponses[${questionId}][fichier]`, response.file);

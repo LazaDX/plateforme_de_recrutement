@@ -71,7 +71,6 @@ class PostuleOffreController extends Controller
                     if (in_array($question->type, ['image', 'fichier'])) {
                         $rules["reponses.{$question->id}.fichier"] = 'required|file';
                     } elseif ($question->type === 'geographique') {
-                        // Valider les champs géographiques selon les options
                         if ($question->all_regions && !$question->region_id) {
                             $rules["reponses.{$question->id}.region_id"] = 'required|integer|exists:regions,id';
                         }
@@ -88,8 +87,6 @@ class PostuleOffreController extends Controller
             }
 
             $request->validate($rules);
-
-            // Créer la candidature
             $candidature = PostuleOffre::create([
                 'offre_id' => $offre->id,
                 'enqueteur_id' => auth()->id(),
@@ -98,7 +95,6 @@ class PostuleOffreController extends Controller
                 'status_postule' => 'en_attente'
             ]);
 
-            // Sauvegarder les réponses
             foreach ($offre->questionFormulaire as $question) {
                 $reponseData = [
                     'postule_offre_id' => $candidature->id,

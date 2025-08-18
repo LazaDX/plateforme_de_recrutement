@@ -8,15 +8,8 @@ use Carbon\Carbon;
 
 class AnalyticsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
     public function getAnalytics($timeRange)
     {
-        // Convertir la période en jours
         $days = (int) $timeRange;
         $startDate = Carbon::now()->subDays($days);
         $previousStartDate = Carbon::now()->subDays($days * 2);
