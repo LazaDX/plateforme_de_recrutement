@@ -7,6 +7,7 @@ use App\Http\Controllers\GeoController;
 use App\Http\Controllers\EnqueteurController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CandidatureExportController;
+use App\Http\Controllers\CandidaturePdfController;
 
 Route::middleware('guest:admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
@@ -85,6 +86,9 @@ Route::middleware('auth:admin')->group(function () {
     // Route pour la recherche de candidatures (optionnelle)
     Route::get('offers/{offre}/search-candidatures', [CandidatureExportController::class, 'searchCandidatures'])
         ->name('offers.search-candidatures');
+
+    Route::get('/candidatures/{candidature}/pdf', [CandidaturePdfController::class, 'downloadResponses'])
+        ->name('candidatures.pdf');
 });
 
 

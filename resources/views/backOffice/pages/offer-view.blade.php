@@ -418,9 +418,18 @@
                         <i class="fas fa-file-alt mr-2"></i>
                         Réponses de @{{ currentCandidate?.enqueteur?.nom }}
                     </h2>
-                    <button @click="showResponsesModal = false" class="text-white hover:text-gray-200 transition-colors">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <button @click="downloadResponsesPdf" :disabled="downloadingPdf"
+                            class="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center text-sm">
+                            <i :class="downloadingPdf ? 'fas fa-spinner fa-spin' : 'fas fa-file-pdf'" class="mr-2"></i>
+                            <span v-if="downloadingPdf">Génération...</span>
+                            <span v-else>PDF</span>
+                        </button>
+                        <button @click="showResponsesModal = false"
+                            class="text-white hover:text-gray-200 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="p-6">
                     <div v-if="loadingResponses" class="text-center py-8">
@@ -567,6 +576,7 @@
                 const filteredCandidatures = ref([]);
                 const allCandidatures = ref(@json($offre->postuleOffre->toArray()));
                 const totalCandidatures = ref({{ $offre->postuleOffre->count() }});
+                const downloadingPdf = ref(false);
 
                 // Filtrage des candidatures
                 const filterCandidates = () => {
@@ -778,8 +788,82 @@
                 // Initialisation
                 filterCandidates();
 
+                const downloadResponsesPdf = async () => {
+                    if (!currentCandidate.value?.id) {
+                        notyf.error('Aucune candidature sélectionnée');
+                        return;
+                    }
+
+                    downloadingPdf.value = true;
+
+                    try {
+                        const response = await fetch(
+                            `/admin/candidatures/${currentCandidate.value.id}/pdf`, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/pdf',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                        .content,
+                                }
+                            });
+
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
+                        }
+
+                        // Vérifier le type de contenu
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/pdf')) {
+                            throw new Error('Format de fichier incorrect reçu du serveur');
+                        }
+
+                        // Obtenir le blob
+                        const blob = await response.blob();
+                        if (blob.size === 0) {
+                            throw new Error('Fichier vide reçu du serveur');
+                        }
+
+                        // Extraire le nom de fichier depuis les en-têtes ou créer un nom par défaut
+                        let filename =
+                            `reponses_${currentCandidate.value.enqueteur.nom.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+                        const disposition = response.headers.get('content-disposition');
+                        if (disposition && disposition.includes('filename=')) {
+                            const matches = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                            if (matches && matches[1]) {
+                                filename = matches[1].replace(/['"]/g, '');
+                            }
+                        }
+
+                        // Créer et déclencher le téléchargement
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+                        link.style.display = 'none';
+
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Nettoyer l'URL
+                        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+
+                        notyf.success('PDF téléchargé avec succès !');
+
+                    } catch (error) {
+                        console.error('Erreur lors du téléchargement PDF:', error);
+                        notyf.error(error.message || 'Erreur lors du téléchargement du PDF');
+                    } finally {
+                        downloadingPdf.value = false;
+                    }
+                };
+
                 return {
                     searchQuery,
+                    downloadingPdf,
+                    downloadResponsesPdf,
                     statusFilter,
                     showOfferDetails,
                     showResponsesModal,
