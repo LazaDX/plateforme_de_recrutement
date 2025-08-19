@@ -8,6 +8,7 @@ use App\Http\Controllers\EnqueteurController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CandidatureExportController;
 use App\Http\Controllers\CandidaturePdfController;
+use App\Http\Controllers\DashboardController;
 
 Route::middleware('guest:admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'create'])->name('login');
@@ -17,9 +18,11 @@ Route::middleware('guest:admin')->group(function () {
 
 
 Route::middleware('auth:admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('backOffice.pages.dashboard');
-    })->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('backOffice.pages.dashboard');
+    // })->name('dashboard');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/enqueteurs', function () {
         return view('backOffice.pages.enqueteurs');
@@ -89,6 +92,8 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::get('/candidatures/{candidature}/pdf', [CandidaturePdfController::class, 'downloadResponses'])
         ->name('candidatures.pdf');
+
+    //Dash
 });
 
 

@@ -56,7 +56,7 @@
                 </div>
                 <div class="flex-1 text-left min-w-0">
                     <p class="text-sm font-medium text-gray-900 truncate">{{ Auth::guard('admin')->user()->nom }}</p>
-                    <p class="text-xs text-gray-500">Administrateur</p>
+                    <p class="text-xs text-gray-500">{{ Auth::guard('admin')->user()->role->nom_role }}</p>
                 </div>
                 <i class="fas fa-chevron-up text-gray-400 text-xs transform transition-transform duration-200"></i>
             </button>
