@@ -654,6 +654,9 @@
                         this.notyf.error('Impossible de charger les communes');
                     }
                 },
+                removeField(index) {
+                    this.formulaire.splice(index, 1);
+                },
                 addOption() {
                     if (this.currentOption.trim() && !this.newField.options.includes(this.currentOption.trim())) {
                         this.newField.options.push(this.currentOption.trim());
