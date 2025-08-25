@@ -101,7 +101,37 @@ class PostuleOffreController extends Controller
                     'question_id' => $question->id,
                 ];
 
-                if ($question->type === 'image' || $question->type === 'fichier') {
+                if ($question->type === 'choix_avec_condition') {
+                    $reponseData['valeur'] = $request->input("reponses.{$question->id}.valeur") ?? '';
+
+                    if ($request->has("reponses.{$question->id}.conditions")) {
+                        $conditions = $request->input("reponses.{$question->id}.conditions");
+                        $conditionsData = [];
+                        foreach ($conditions as $key => $value) {
+                            $conditionsData[$key] = [
+                                'value' => $value,
+                                'file_path' => null
+                            ];
+                        }
+                    }
+
+                    if ($request->hasFile("reponses.{$question->id}.condition_files")) {
+                        foreach ($request->file("reponses.{$question->id}.condition_files") as $fileKey => $uploadedFile) {
+                            if ($uploadedFile) {
+                                $fileName = time() . '_' . $fileKey . '_' . $uploadedFile->getClientOriginalName();
+                                $path = $uploadedFile->storeAs('uploads/conditions', $fileName, 'public');
+                                $conditionFile = new ReponseFormulaire();
+                                $conditionFile->postule_offre_id = $candidature->id;
+                                $conditionFile->question_id      = $question->id;
+                                $conditionFile->valeur           = $path;
+                                $conditionFile->condition_key    = $fileKey;
+                                $conditionFile->save();
+                            }
+                        }
+                    }
+                    $reponseData['conditions_data'] = json_encode($conditionsData);
+
+                } elseif ($question->type === 'image' || $question->type === 'fichier') {
                     if ($request->hasFile("reponses.{$question->id}.fichier")) {
                         $file = $request->file("reponses.{$question->id}.fichier");
                         $folder = $question->type === 'image' ? 'ImageEnqueteur' : 'FichierEnqueteur';

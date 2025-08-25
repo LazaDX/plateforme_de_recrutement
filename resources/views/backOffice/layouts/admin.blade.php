@@ -36,6 +36,30 @@
         .transition-opacity {
             transition: opacity 0.3s ease-in-out;
         }
+
+        .condition-option-card {
+            transition: all 0.3s ease;
+        }
+
+        .condition-option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .condition-form-enter-active,
+        .condition-form-leave-active {
+            transition: all 0.3s ease;
+        }
+
+        .condition-form-enter-from,
+        .condition-form-leave-to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .conditional-option-tag {
+            background: linear-gradient(45deg, #8b5cf6, #a855f7);
+        }
     </style>
 </head>
 

@@ -7,7 +7,7 @@
         <!-- Main Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div v-for="card in statsCards" :key="card.id" :class="card.bgClass"
-                class="rounded-lg shadow p-6 border-l-4 transition-all">
+                class="rounded-lg shadow p-6 transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">@{{ card.title }}</p>
@@ -111,7 +111,7 @@
                         title: 'Offres publiées',
                         value: {{ $stats['offres_count'] }},
                         extra: '+{{ $stats['offres_qui_expirent'] }} expirent bientôt',
-                        bgClass: 'bg-white border-l-4 border-blue-500 p-6',
+                        bgClass: 'bg-white p-6',
                         iconBg: 'bg-blue-100',
                         icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -122,7 +122,7 @@
                         title: 'Candidatures',
                         value: {{ $stats['candidatures_count'] }},
                         extra: '+{{ $stats['candidatures_cette_semaine'] }} cette semaine',
-                        bgClass: 'bg-white border-l-4 border-green-500 p-6',
+                        bgClass: 'bg-white p-6',
                         iconBg: 'bg-green-100',
                         icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -133,7 +133,7 @@
                         title: 'Enquêteurs',
                         value: {{ $stats['enqueteurs_count'] }},
                         extra: '+{{ $stats['nouveaux_enqueteurs'] }} nouveaux ce mois',
-                        bgClass: 'bg-white border-l-4 border-purple-500 p-6',
+                        bgClass: 'bg-white p-6',
                         iconBg: 'bg-purple-100',
                         icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -144,7 +144,7 @@
                         title: 'Taux de conversion',
                         value: '24.5%',
                         extra: '+2.5% vs mois dernier',
-                        bgClass: 'bg-white border-l-4 border-orange-500 p-6',
+                        bgClass: 'bg-white  p-6',
                         iconBg: 'bg-orange-100',
                         icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

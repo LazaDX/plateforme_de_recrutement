@@ -19,8 +19,18 @@ class ReponseFormulaire extends Model
     protected $fillable = [
         'id','postule_offre_id', 'question_id','region_id',
         'district_id',
-        'commune_id', 'valeur', 'fichier_path'
+        'commune_id', 'valeur', 'fichier_path', 'conditions_data',
+        'condition_key'
     ];
+
+    protected $casts = [
+        'conditions_data' => 'array',
+    ];
+
+    public function getConditionsAttribute()
+    {
+        return $this->conditions_data ?? [];
+    }
 
     public function postuleOffre()
     {

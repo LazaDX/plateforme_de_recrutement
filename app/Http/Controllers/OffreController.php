@@ -108,7 +108,7 @@ class OffreController extends Controller
                     'offre_id' => $offre->id,
                     'label' => $question['label'],
                     'type' => $question['type'],
-                    'obligation' => $question['obligation'],
+                    'obligation' => $question['obligation'] ?? false,
                     'all_regions' => $all_regions,
                     'all_districts' => $all_districts,
                     'all_communes' => $all_communes,
@@ -119,6 +119,10 @@ class OffreController extends Controller
 
                 if (in_array($question['type'], ['liste', 'choix_multiple']) && isset($question['options'])) {
                     $questionData['options'] = implode('|', $question['options']);
+                }
+                if ($question['type'] === 'choix_avec_condition' &&
+                    isset($question['conditional_options'])) {
+                    $questionData['conditional_options'] = json_encode($question['conditional_options']);
                 }
 
                 QuestionFormulaire::create($questionData);

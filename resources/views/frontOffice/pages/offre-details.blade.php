@@ -268,6 +268,10 @@
                                         :value="responses[question.id].selected_options.join(', ')">
                                 </div>
 
+                                <div v-else-if="question.type === 'choix_avec_condition'" class="space-y-4">
+                                    @include('frontOffice.components.offer-details-choixCondition')
+                                </div>
+
                                 <!-- Image -->
                                 <div v-else-if="question.type === 'image'" class="space-y-3">
                                     <div
@@ -455,10 +459,47 @@
                             multiple_values: [''],
                             file: null,
                             fileName: '',
-                            preview: null
+                            preview: null,
+                            selected_main_option: '',
+                            conditions: {},
+                            condition_multiple: {},
+                            condition_files: {}
                         };
                         this.districts[question.id] = [];
                         this.communes[question.id] = [];
+
+                        if (question.type === 'choix_avec_condition' && question.conditional_options) {
+                            try {
+                                question.conditional_options_array = typeof question.conditional_options ===
+                                    'string' ?
+                                    JSON.parse(question.conditional_options) :
+                                    question.conditional_options;
+                                // Vérifier que conditional_options_array est un tableau
+                                if (!Array.isArray(question.conditional_options_array)) {
+                                    console.warn(
+                                        `conditional_options_array n'est pas un tableau pour la question ${question.id}`
+                                    );
+                                    question.conditional_options_array = [];
+                                }
+                            } catch (e) {
+                                console.error(
+                                    `Erreur parsing conditional_options pour la question ${question.id}:`, e
+                                );
+                                question.conditional_options_array = [];
+                            }
+
+                            // Initialiser les choix multiples pour les conditions
+                            question.conditional_options_array.forEach(option => {
+                                if (option.conditions && Array.isArray(option.conditions)) {
+                                    option.conditions.forEach(condition => {
+                                        if (condition.type === 'choix_multiple') {
+                                            this.responses[question.id].condition_multiple[
+                                                option.label + '_' + condition.label] = [];
+                                        }
+                                    });
+                                }
+                            });
+                        }
 
                         // Préparer les options pour les listes et choix multiples
                         if (question.options) {
@@ -471,6 +512,55 @@
                     });
                 },
                 methods: {
+                    handleMainOptionChange(questionId, optionLabel) {
+                        // Réinitialiser les conditions quand on change d'option principale
+                        this.responses[questionId].conditions = {};
+                        this.responses[questionId].condition_multiple = {};
+                        this.responses[questionId].condition_files = {};
+
+                        // Réinitialiser les choix multiples pour la nouvelle option
+                        const question = this.questions.find(q => q.id === questionId);
+                        if (question && question.conditional_options_array) {
+                            const selectedOption = question.conditional_options_array.find(opt => opt.label ===
+                                optionLabel);
+                            if (selectedOption && selectedOption.conditions) {
+                                selectedOption.conditions.forEach(condition => {
+                                    if (condition.type === 'choix_multiple') {
+                                        this.responses[questionId].condition_multiple[optionLabel + '_' +
+                                            condition.label] = [];
+                                    }
+                                });
+                            }
+                        }
+                    },
+
+                    handleConditionFileUpload(questionId, optionLabel, conditionLabel, conditionType, event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const maxSize = conditionType === 'image' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                            this.$notyf.error(
+                                `Le fichier est trop volumineux (max ${conditionType === 'image' ? '5MB' : '10MB'})`
+                            );
+                            event.target.value = '';
+                            return;
+                        }
+
+                        const fileKey = optionLabel + '_' + conditionLabel;
+                        this.responses[questionId].condition_files[fileKey] = file;
+                        this.responses[questionId].condition_files[fileKey + '_name'] = file.name;
+
+                        // Créer aperçu pour les images
+                        if (conditionType === 'image') {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.responses[questionId].condition_files[fileKey + '_preview'] = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    },
+
                     // Méthode pour ajouter une nouvelle valeur dans un champ multiple
                     addMultipleValue(questionId) {
                         if (!this.responses[questionId].multiple_values) {
@@ -584,12 +674,34 @@
                         formData.append('_token', '{{ csrf_token() }}');
                         formData.append('offre_id', this.offreId);
 
-                        // Ajouter les réponses
+
                         Object.keys(this.responses).forEach(questionId => {
                             const response = this.responses[questionId];
                             const question = this.questions.find(q => q.id == questionId);
+                            if (question.type === 'choix_avec_condition') {
+                                formData.append(`reponses[${questionId}][valeur]`, response
+                                    .selected_main_option || '');
 
-                            if (question.type === 'choix_multiple') {
+
+                                Object.keys(response.conditions).forEach(conditionKey => {
+                                    if (response.conditions[conditionKey]) {
+                                        formData.append(
+                                            `reponses[${questionId}][conditions][${conditionKey}]`,
+                                            response.conditions[conditionKey]);
+                                    }
+                                });
+
+                                Object.keys(response.condition_files).forEach(fileKey => {
+                                    if (fileKey.endsWith('_name') || fileKey.endsWith('_preview'))
+                                        return;
+                                    const file = response.condition_files[fileKey];
+                                    if (file instanceof File) {
+                                        formData.append(
+                                            `reponses[${questionId}][condition_files][${fileKey}]`,
+                                            file);
+                                    }
+                                });
+                            } else if (question.type === 'choix_multiple') {
                                 formData.append(`reponses[${questionId}][valeur]`, response.selected_options
                                     .join(', '));
                             } else if (question.type === 'champ_multiple') {

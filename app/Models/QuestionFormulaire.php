@@ -16,7 +16,7 @@ class QuestionFormulaire extends Model
     use HasFactory;
     protected $table = 'questions_formulaires';
     protected $fillable = [
-        'id','offre_id', 'label', 'type', 'obligation',  'options',
+        'id','offre_id', 'label', 'type', 'obligation',  'options', 'conditional_options',
         'all_regions',
         'region_id',
         'all_districts',
@@ -30,8 +30,17 @@ class QuestionFormulaire extends Model
         'all_regions'   => 'boolean',
         'all_districts' => 'boolean',
         'all_communes'  => 'boolean',
+        'conditional_options' => 'array'
     ];
 
+    public function getConditionalOptionsArrayAttribute()
+    {
+        return $this->conditional_options ?
+            (is_string($this->conditional_options) ?
+                json_decode($this->conditional_options, true) :
+                $this->conditional_options
+            ) : [];
+    }
 
     public function getOptionsArrayAttribute()
     {

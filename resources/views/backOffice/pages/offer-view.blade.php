@@ -4,28 +4,28 @@
 
 @section('content')
     <div id="app" class="container mx-auto p-4">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Candidatures pour : {{ $offre->nom_enquete }}</h1>
+        <div class="flex flex-col justify-between mb-8">
+            <a href="{{ route('admin.offers') }}" class="text-blue-600 hover:text-blue-800 flex items-center mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd" />
+                </svg>
+                Retour aux offres
+            </a>
             <div class="flex gap-3">
+                <h1 class="text-2xl font-bold text-gray-500">Candidatures pour : "{{ $offre->nom_enquete }}"</h1>
                 <button @click="showOfferDetails = true"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors flex items-center">
                     <i class="fas fa-info-circle mr-2"></i>
-                    Détails de l'offre
+                    Détails
                 </button>
-                <a href="{{ route('admin.offers') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    Retour aux offres
-                </a>
             </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+            <div class="bg-white rounded-lg shadow p-4 ">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Total candidatures</p>
@@ -44,7 +44,7 @@
                     +{{ $offre->postuleOffre->where('created_at', '>=', now()->subDays(7))->count() }} cette semaine</p>
             </div>
 
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+            <div class="bg-white rounded-lg shadow p-4 ">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Visites</p>
@@ -65,7 +65,7 @@
                     candidatures</p>
             </div>
 
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+            <div class="bg-white rounded-lg shadow p-4 ">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Taux de conversion</p>
