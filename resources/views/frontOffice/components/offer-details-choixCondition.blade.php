@@ -12,9 +12,9 @@
 
                 <!-- Conditions pour cette option -->
                 <div v-if="responses[question.id].selected_main_option === option.label && option.conditions.length > 0"
-                    class="mt-4 pl-4 border-l-4 border-blue-200 bg-blue-50 rounded-r-lg p-4 space-y-4">
-                    <h5 class="font-medium text-blue-800 mb-3">
-                        <i class="fas fa-arrow-right mr-2"></i>
+                    class="mt-4 pl-4 border-l-4 border-gray-200 bg-gray-50 rounded-r-lg p-4 space-y-4">
+                    <h5 class="font-medium text-gray-800 mb-3">
+                        {{-- <i class="fas fa-arrow-right mr-2"></i> --}}
                         Informations supplémentaires requises :
                     </h5>
 
@@ -35,7 +35,7 @@
                                 v-model="responses[question.id].conditions[option.label + '_' + condition.label]"
                                 :name="'reponses[' + question.id + '][conditions][' + option.label + '_' + condition
                                     .label + ']'"
-                                class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                class="pl-10 w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                 :required="condition.obligation && responses[question.id].selected_main_option === option.label">
                         </div>
 

@@ -116,7 +116,7 @@ class EnqueteurDashboardController extends Controller
            'total' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->count(),
            'en_attente' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->where('status_postule', 'en_attente')->count(),
            'accepte' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->where('status_postule', 'accepte')->count(),
-           'refuse' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->where('status_postule', 'refuse')->count(),
+           'rejete' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->where('status_postule', 'rejete')->count(),
            'termine' => PostuleOffre::where('enqueteur_id', $enqueteur->id)->where('status_postule', 'termine')->count(),
            'ce_mois' => PostuleOffre::where('enqueteur_id', $enqueteur->id)
                ->whereMonth('date_postule', now()->month)

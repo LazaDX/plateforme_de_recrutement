@@ -40,7 +40,7 @@
                                 <option value="all">Tous</option>
                                 <option value="en_attente">En attente</option>
                                 <option value="accepte">Accepté</option>
-                                <option value="refuse">Refusé</option>
+                                <option value="rejete">Refusé</option>
                                 <option value="termine">Terminé</option>
                             </select>
                         </div>
@@ -57,7 +57,7 @@
                             <div class="text-gray-500">Accepté</div>
                         </div>
                         <div class="text-center">
-                            <div class="font-semibold text-red-600">@{{ stats.refuse || 0 }}</div>
+                            <div class="font-semibold text-red-600">@{{ stats.rejete || 0 }}</div>
                             <div class="text-gray-500">Refusé</div>
                         </div>
                     </div>
@@ -216,7 +216,7 @@
                     const classes = {
                         'en_attente': 'bg-yellow-100 text-yellow-800',
                         'accepte': 'bg-green-100 text-green-800',
-                        'refuse': 'bg-red-100 text-red-800',
+                        'rejete': 'bg-red-100 text-red-800',
                         'termine': 'bg-gray-100 text-gray-800'
                     };
                     return classes[status] || 'bg-gray-100 text-gray-800';
@@ -226,7 +226,7 @@
                     const texts = {
                         'en_attente': 'En attente',
                         'accepte': 'Accepté',
-                        'refuse': 'Refusé',
+                        'rejete': 'Refusé',
                         'termine': 'Terminé'
                     };
                     return texts[status] || status;
@@ -356,7 +356,7 @@
                     const newStats = {
                         en_attente: 0,
                         accepte: 0,
-                        refuse: 0,
+                        rejete: 0,
                         termine: 0
                     };
 

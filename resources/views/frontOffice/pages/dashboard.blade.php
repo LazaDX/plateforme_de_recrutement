@@ -26,10 +26,10 @@
                         <h1 class="text-3xl md:text-4xl font-bold mb-2">
                             Bonjour, <span v-text="userInfo.nom ?? 'Enquêteur'"></span> !
                         </h1>
-                        <p class="text-lg opacity-90">Voici un aperçu de votre activité</p>
-                        <p class="text-sm opacity-75 mt-1">
+                        <p class="text-lg opacity-90">Vous trouveriez ci-dessous vos activitées</p>
+                        {{-- <p class="text-sm opacity-75 mt-1">
                             Dernière connexion : <span v-text="formatDateTime(userInfo.last_login_at)"></span>
-                        </p>
+                        </p> --}}
                     </div>
                     <div class="bg-white bg-opacity-20 rounded-lg p-4 min-w-fit">
                         <div class="text-center">
@@ -43,7 +43,7 @@
 
         <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Statistiques principales -->
-            <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center justify-between">
                         <div>
@@ -87,6 +87,20 @@
                         Taux : <span v-text="calculateSuccessRate()"></span>%
                     </p>
                 </div>
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Rejeté</p>
+                            <p class="text-2xl font-bold text-gray-900" v-text="stats.rejete || 0"></p>
+                        </div>
+                        <div class="bg-red-100 rounded-full p-3">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        Taux : <span v-text="calculateSuccessRate()"></span>%
+                    </p>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -119,6 +133,7 @@
                                                     class="px-2 py-1 rounded-full text-xs font-medium border"
                                                     v-text="getStatusText(candidature.status_postule)">
                                                 </span>
+                                                <span class="text-xs text-gray-500">Vous avez postulé en tant que: </span>
                                                 <span class="text-xs text-gray-500"
                                                     v-text="capitalizeFirst(candidature.type_enqueteur)"></span>
                                             </div>
@@ -171,7 +186,8 @@
                         <div v-if="nouvellesOffres.length > 0" class="space-y-3">
                             <div v-for="offre in nouvellesOffres.slice(0, 3)" :key="offre.id"
                                 class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200">
-                                <h4 class="font-medium text-sm text-gray-900 mb-1" v-text="truncate(offre.nom_enquete, 40)">
+                                <h4 class="font-medium text-sm text-gray-900 mb-1"
+                                    v-text="truncate(offre.nom_enquete, 40)">
                                 </h4>
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs text-gray-500"
@@ -194,7 +210,7 @@
                     <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-3">
                             <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
-                            Conseil du jour
+                            Conseil
                         </h3>
                         <p class="text-sm text-gray-700 mb-3" v-text="conseilDuJour"></p>
                     </div>
@@ -232,7 +248,7 @@
                     const classes = {
                         'en_attente': 'bg-yellow-100 text-yellow-800 border-yellow-200',
                         'accepte': 'bg-green-100 text-green-800 border-green-200',
-                        'refuse': 'bg-red-100 text-red-800 border-red-200',
+                        'rejete': 'bg-red-100 text-red-800 border-red-200',
                         'termine': 'bg-blue-100 text-blue-800 border-blue-200'
                     };
                     return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
@@ -242,7 +258,7 @@
                     const texts = {
                         'en_attente': 'En attente',
                         'accepte': 'Accepté',
-                        'refuse': 'Refusé',
+                        'rejete': 'Rejeté',
                         'termine': 'Terminé'
                     };
                     return texts[status] || status;
@@ -279,6 +295,11 @@
                 const calculateSuccessRate = () => {
                     return stats.value.total > 0 ?
                         Math.round((stats.value.accepte || 0) / stats.value.total * 100, 1) : 0;
+                };
+
+                const calculateFaileRate = () => {
+                    return stats.value.total > 0 ?
+                        Math.round((stats.value.rejete || 0) / stats.value.total * 100, 1) : 0;
                 };
 
                 const capitalizeFirst = (str) => {
